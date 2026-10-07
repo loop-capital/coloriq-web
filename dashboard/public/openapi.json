@@ -734,7 +734,7 @@
     },
     "/api/v1/transformations/{id}/consent": {
       "post": {
-        "description": "Records the client's marketing consent attestation. Combine with the after-photo ask: 'Got the after photo \u2014 did the client agree to us sharing it?' Photo + consent in one breath. attested_by and attested_at are server-derived from the authenticated stylist. IDEMPOTENT-OVERWRITE: recording consent twice updates the record (last attestation wins, e.g. verbal upgraded to signed) \u2014 never 409. This matches PATCH behavior. Recording consent does NOT publish; publishing is a separate step. Requires transformations:write scope.",
+        "description": "Record the marketing consent attestation. Idempotent when the attestation matches an existing one (200 no-op); 409 CONSENT_CONFLICT when it differs.",
         "operationId": "recordConsent",
         "parameters": [
           {
@@ -827,6 +827,9 @@
               }
             },
             "description": "Not found (or not owned by this stylist)"
+          },
+          "409": {
+            "description": "A different attestation already exists (CONSENT_CONFLICT)"
           }
         },
         "summary": "Record marketing consent for a transformation"
