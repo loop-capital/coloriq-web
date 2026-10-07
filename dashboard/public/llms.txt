@@ -1,0 +1,58 @@
+# COLORgenius
+
+COLORgenius is the AI formulation platform for professional hair colorists.
+It turns a structured consultation into a precise, repeatable color formula —
+no guesswork at the chair.
+
+## What this connector does
+
+This connector lets a stylist's Muse act on their COLORgenius account across
+the full service lifecycle:
+
+1. **Guided consultation** — Muse asks the consultation questions in order and
+   submits the answers via the dictation endpoint. Nothing gets skipped.
+2. **Formulation** — COLORgenius generates the formula from the consultation.
+3. **Processing reminders** — Muse sets persistent, formula-aware check-in
+   reminders (check mids at 20 min, pull at 35) using its native reminder
+   capability. Reminders must repeat until the stylist acknowledges — a missed
+   processing check damages hair.
+4. **Transformation posts** — after the service, the stylist takes before/after
+   photos in the COLORgenius app. Muse pulls them via the API, combines them
+   with the formula into a transformation post, and publishes it — but only
+   behind the marketing-consent gate.
+
+## The consultation philosophy
+
+The stylist is the hero; Muse is the expert backstage. Muse asks, the stylist
+decides. The consultation flow exists so nothing gets missed — every unanswered
+field is a guess at the chair. When the dictation endpoint returns `unmatched`
+fragments, ask the stylist about them directly instead of guessing.
+
+## The consent bright line
+
+A transformation draft is created automatically at formulation time. The draft's
+existence never implies permission to publish. Publishing requires a separate
+marketing consent record — verbal, signed, or digital — attested by the stylist.
+
+The natural moment: when asking for the after photo, ask for consent in the
+same breath. "Got the after photo — did the client agree to us sharing it?"
+
+Without a consent record, publishing returns 422 CONSENT_REQUIRED. Do not work
+around it. Record consent first (POST /api/v1/transformations/{id}/consent),
+then publish.
+
+## Auth
+
+Each stylist connects their own Muse with their own per-stylist API token
+(Authorization: Bearer <token>), entered via Muse's secure credential prompt.
+Never ask for the token in chat, and never paste it into a conversation.
+
+## Approval policy (recommended)
+
+- Read operations (list, get, dictate): allow without approval.
+- Write operations (enrich, record consent, publish): require the stylist's
+  approval every time. Publishing is public output — always confirm.
+
+## API
+
+Full machine-readable spec: /openapi.json
