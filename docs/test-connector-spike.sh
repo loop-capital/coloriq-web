@@ -60,16 +60,17 @@ assert c.get('attested_at'), 'attested_at missing'
 print('  consent record OK:', c['method'], c['attested_by'][:8] + '...', c['attested_at'])
 "
 
-echo "=== 5. Record consent again (signed) -> 200 idempotent-overwrite ==="
-CONS2_CODE=$(curl -s -o /tmp/cons1.json -w '%{http_code}' -X POST "$BASE_URL/api/v1/transformations/$TID/consent" \
+echo "=== 5a. Record SAME consent again (verbal) -> 200 no-op ==="
+CONS2_CODE=$(curl -s -o /tmp/cons2.json -w '%{http_code}' -X POST "$BASE_URL/api/v1/transformations/$TID/consent" \
+  -H "$AUTH" -H 'Content-Type: application/json' \
+  -d '{"method":"verbal","note":"e2e test"}')
+check "consent same-content -> 200 no-op" 200 "$CONS2_CODE"
+
+echo "=== 5b. Record DIFFERENT consent (signed) -> 409 CONSENT_CONFLICT ==="
+CONS3_CODE=$(curl -s -o /tmp/cons3.json -w '%{http_code}' -X POST "$BASE_URL/api/v1/transformations/$TID/consent" \
   -H "$AUTH" -H 'Content-Type: application/json' -d '{"method":"signed"}')
-check "consent overwrite -> 200" 200 "$CONS2_CODE"
-python3 -c "
-import json
-d = json.load(open('/tmp/cons1.json'))
-assert d['client_consent']['method'] == 'signed', 'overwrite failed'
-print('  overwrite OK: method is now signed')
-"
+check "consent conflict -> 409" 409 "$CONS3_CODE"
+grep -q CONSENT_CONFLICT /tmp/cons3.json && echo "  error code is CONSENT_CONFLICT" || echo "  WARN: expected CONSENT_CONFLICT in body"
 
 echo "=== 6. Enrich with after photo ==="
 ENR_CODE=$(curl -s -o /dev/null -w '%{http_code}' -X PATCH "$BASE_URL/api/v1/transformations/$TID" \
