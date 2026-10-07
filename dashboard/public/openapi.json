@@ -1,1 +1,981 @@
-{"components":{"schemas":{"ConsentRecord":{"description":"Marketing consent attestation. attested_by and attested_at are server-derived from the authenticated stylist and current time.","properties":{"attested_at":{"description":"When consent was recorded (server-set)","format":"date-time","type":"string"},"attested_by":{"description":"Stylist ID who recorded consent (server-set)","type":"string"},"client_ref":{"description":"Opaque salon-side client identifier. No client PII.","nullable":true,"type":"string"},"method":{"enum":["verbal","signed","digital"],"type":"string"},"note":{"nullable":true,"type":"string"}},"required":["method"],"type":"object"},"ConsultationFields":{"description":"The 28 consultation fields. Keys are dotted paths. Levels are integers 1-10. Tones are single-letter codes: N=Neutral/Natural, A=Ash, G=Gold, K=Copper, R=Red, V=Violet, P=Pearl, B=Beige, M=Mahogany, Ch=Chocolate, W=Warm, C=Cool.","properties":{"brandPreference":{"type":"string"},"chemicalHistory":{"description":"Prior chemical services","items":{"type":"string"},"type":"array"},"condition.banding":{"type":"boolean"},"condition.colorGrab":{"type":"boolean"},"condition.grayPercent":{"maximum":100,"minimum":0,"type":"integer"},"condition.greenCast":{"type":"boolean"},"condition.highlightedPercent":{"maximum":100,"minimum":0,"type":"integer"},"condition.highlights":{"type":"boolean"},"condition.hollowEnds":{"type":"boolean"},"condition.hotRoots":{"type":"boolean"},"condition.muddyToner":{"type":"boolean"},"condition.multipleColors":{"type":"boolean"},"condition.overAshy":{"type":"boolean"},"condition.porosity":{"enum":["low","normal","high"],"type":"string"},"condition.previousLightener":{"type":"boolean"},"condition.type":{"description":"Hair condition (enum: virgin, bleached, gray_coverage, previously_colored, damaged, etc.)","type":"string"},"currentLevel":{"description":"Current natural/starting level","maximum":10,"minimum":1,"type":"integer"},"currentTone":{"description":"Current tone letter code","type":"string"},"density":{"enum":["thin","medium","thick"],"type":"string"},"hairPattern":{"enum":["straight","wavy","curly","coily"],"type":"string"},"hairType":{"description":"oily, normal, or dry","type":"string"},"lastChemicalService":{"description":"Most recent chemical service (enum)","type":"string"},"linePreference":{"type":"string"},"sensitivities":{"description":"Allergies/sensitivities","items":{"type":"string"},"type":"array"},"serviceType":{"description":"Service being performed (enum)","type":"string"},"targetLevel":{"description":"Goal level","maximum":10,"minimum":1,"type":"integer"},"targetTone":{"description":"Goal tone letter code","type":"string"},"texture":{"enum":["fine","medium","coarse"],"type":"string"}},"type":"object"},"Error":{"properties":{"error":{"type":"string"},"message":{"type":"string"}},"type":"object"},"Transformation":{"properties":{"after_photo_ref":{"nullable":true,"type":"string"},"after_photo_url":{"description":"Short-lived (15 min) signed download URL","type":"string"},"before_photo_ref":{"type":"string"},"before_photo_url":{"description":"Short-lived (15 min) signed download URL","type":"string"},"client_consent":{"$ref":"#/components/schemas/ConsentRecord","nullable":true},"created_at":{"format":"date-time","type":"string"},"enriched_at":{"format":"date-time","nullable":true,"type":"string"},"formulation_id":{"type":"string"},"id":{"format":"uuid","type":"string"},"published_at":{"format":"date-time","nullable":true,"type":"string"},"published_post_ref":{"nullable":true,"type":"string"},"shade_story":{"nullable":true,"type":"string"},"shades":{"description":"Structured brands/shade names/tone/level","nullable":true,"type":"object"},"source_formula_id":{"description":"Marketplace listing used as starting point, if any","nullable":true,"type":"string"},"status":{"enum":["draft","enriched","published"],"type":"string"},"stylist_id":{"type":"string"}},"type":"object"}},"securitySchemes":{"bearerAuth":{"description":"Per-stylist API token, issued in the COLORgenius dashboard (Settings > API tokens). Sent as Authorization: Bearer <token>. Tokens carry scopes: transformations:read, transformations:write. Enter the token via Muse's secure credential prompt — never paste it into chat.","scheme":"bearer","type":"http"}}},"info":{"description":"COLORgenius is the AI formulation platform for professional hair colorists. This API is the thin-adapter surface for the Muse custom connector: it exposes the consultation, formulation, and transformation lifecycle. All intelligence (formulation engine, consent gates, publishing rules) lives in the COLORgenius backend — the connector is a dumb pipe.\n\nTHE CONSENT BRIGHT LINE: a transformation draft's existence never implies permission to publish. Publishing requires a separate marketing consent record. POST /transformations/{id}/publish returns 422 CONSENT_REQUIRED without one.\n\nNOTE: there is currently no GET /api/formulations/{id}. Formulation details are returned inline by POST /api/formulate (session auth) and referenced by formulation_id on transformations. A token-authenticated formulation read is a planned follow-up.","title":"COLORgenius Connector API","version":"1.0.0"},"openapi":"3.0.3","paths":{"/api/consultation/dictate":{"post":{"description":"Accepts a stylist's dictated consultation transcript (produced by browser or Muse speech-to-text) and maps it onto the 28 consultation fields via structured AI output. Returns field updates plus a list of unmatched fragments the stylist should fill by hand. Every unanswered field is a guess at the chair — ask follow-ups for anything in `unmatched`. Usage is metered to the salon's invoice. Auth: session OR per-stylist API token.","operationId":"dictateConsultation","requestBody":{"content":{"application/json":{"schema":{"properties":{"currentFields":{"description":"Already-known field values (dotted keys) for context; only transcript-mentioned fields are updated","type":"object"},"transcript":{"description":"The dictated consultation text","maxLength":2000,"minLength":1,"type":"string"}},"required":["transcript"],"type":"object"}}},"required":true},"responses":{"200":{"content":{"application/json":{"schema":{"properties":{"billing":{"properties":{"billedCents":{"type":"number"},"billedMinutes":{"type":"number"}},"type":"object"},"unmatched":{"description":"Transcript fragments that could not be mapped — ask the stylist about these","items":{"type":"string"},"type":"array"},"updates":{"$ref":"#/components/schemas/ConsultationFields"}},"type":"object"}}},"description":"Mapped field updates"},"400":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Invalid request or account not linked to a salon"},"401":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Unauthenticated"},"503":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"AI mapping unavailable (key not configured) — fall back to manual field entry"}},"summary":"Map a spoken consultation transcript onto consultation fields"}},"/api/v1/transformations":{"get":{"description":"List the stylist's own transformations (any status) plus published transformations from others. Powers showcase curation and attribution queries. Requires transformations:read scope (included in :write).","operationId":"listTransformations","parameters":[{"in":"query","name":"status","schema":{"enum":["draft","enriched","published"],"type":"string"}},{"description":"Filter by source marketplace formula","in":"query","name":"formula_id","schema":{"type":"string"}},{"in":"query","name":"stylist_id","schema":{"type":"string"}},{"in":"query","name":"page","schema":{"default":1,"type":"integer"}},{"in":"query","name":"limit","schema":{"default":20,"maximum":50,"type":"integer"}}],"responses":{"200":{"content":{"application/json":{"schema":{"properties":{"data":{"items":{"$ref":"#/components/schemas/Transformation"},"type":"array"},"limit":{"type":"integer"},"page":{"type":"integer"},"total":{"type":"integer"}},"type":"object"}}},"description":"Paginated list"},"401":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Unauthenticated"},"403":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Insufficient scope"}},"summary":"List/search transformations"},"post":{"description":"Creates a draft transformation at formulation time. A draft is created automatically by the formulation flow, and this endpoint is idempotent per formulation — if a draft already exists for the formulation, it is returned instead of duplicating. Requires transformations:write scope.","operationId":"createTransformation","requestBody":{"content":{"application/json":{"schema":{"properties":{"before_photo_ref":{"description":"R2 key/URL of the assessment (before) photo","type":"string"},"formulation_id":{"description":"The finalized formulation (must belong to this stylist)","type":"string"},"shade_story":{"type":"string"},"shades":{"description":"Structured brands/shade names/tone/level","type":"object"},"source_formula_id":{"description":"Marketplace listing used as starting point, if any","type":"string"}},"required":["formulation_id","before_photo_ref"],"type":"object"}}},"required":true},"responses":{"201":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Transformation"}}},"description":"Draft created (or existing draft returned)"},"400":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Missing required fields or bad source_formula_id"},"401":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Unauthenticated"},"403":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Token lacks transformations:write scope"},"404":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Formulation not found (or not owned by this stylist)"}},"summary":"Create a transformation draft"}},"/api/v1/transformations/{id}":{"get":{"description":"The owner sees everything including the consent record and signed photo URLs (15-minute expiry). Non-owners only see published records with consent stripped. Requires transformations:read scope.","operationId":"getTransformation","parameters":[{"in":"path","name":"id","required":true,"schema":{"type":"string"}}],"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Transformation"}}},"description":"The transformation"},"401":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Unauthenticated"},"403":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Insufficient scope"},"404":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Not found (or not visible to this stylist)"}},"summary":"Read a transformation"},"patch":{"description":"Attach the after photo, shade story, and structured shades. draft becomes enriched when after_photo_ref is present. On published records only published_post_ref may change (returns 422 IMMUTABLE_AFTER_PUBLISH otherwise). Requires transformations:write scope.","operationId":"enrichTransformation","parameters":[{"in":"path","name":"id","required":true,"schema":{"type":"string"}}],"requestBody":{"content":{"application/json":{"schema":{"properties":{"after_photo_ref":{"description":"R2 key/URL of the after photo","type":"string"},"client_consent":{"$ref":"#/components/schemas/ConsentRecord","description":"Alternative to the dedicated consent endpoint"},"published_post_ref":{"type":"string"},"shade_story":{"type":"string"},"shades":{"type":"object"},"source_formula_id":{"nullable":true,"type":"string"}},"type":"object"}}},"required":true},"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Transformation"}}},"description":"Updated transformation"},"400":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Invalid input"},"401":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Unauthenticated"},"403":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Insufficient scope"},"404":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Not found (or not owned by this stylist)"},"422":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"IMMUTABLE_AFTER_PUBLISH — only published_post_ref may change on published records"}},"summary":"Enrich a transformation draft"}},"/api/v1/transformations/{id}/consent":{"post":{"description":"Records the client's marketing consent attestation. Combine with the after-photo ask: 'Got the after photo — did the client agree to us sharing it?' Photo + consent in one breath. attested_by and attested_at are server-derived from the authenticated stylist. IDEMPOTENT-OVERWRITE: recording consent twice updates the record (last attestation wins, e.g. verbal upgraded to signed) — never 409. This matches PATCH behavior. Recording consent does NOT publish; publishing is a separate step. Requires transformations:write scope.","operationId":"recordConsent","parameters":[{"in":"path","name":"id","required":true,"schema":{"type":"string"}}],"requestBody":{"content":{"application/json":{"schema":{"properties":{"client_ref":{"description":"Opaque salon-side client identifier. No client PII.","type":"string"},"method":{"description":"How consent was obtained","enum":["verbal","signed","digital"],"type":"string"},"note":{"type":"string"}},"required":["method"],"type":"object"}}},"required":true},"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Transformation"}}},"description":"Consent recorded (returns the transformation)"},"400":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Invalid method or malformed body"},"401":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Unauthenticated"},"403":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Insufficient scope"},"404":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Not found (or not owned by this stylist)"}},"summary":"Record marketing consent for a transformation"}},"/api/v1/transformations/{id}/publish":{"post":{"description":"Flips a transformation to published. HARD REQUIREMENTS: the after photo must be attached (else 422 AFTER_PHOTO_REQUIRED) and a marketing consent record must exist — on the record or in this call's body (else 422 CONSENT_REQUIRED). The draft's existence never implies posting permission. IDEMPOTENT: republishing returns the record as-is (updating published_post_ref when supplied) — safe to retry. Always require the stylist's approval before calling this. Requires transformations:write scope.","operationId":"publishTransformation","parameters":[{"in":"path","name":"id","required":true,"schema":{"type":"string"}}],"requestBody":{"content":{"application/json":{"schema":{"properties":{"client_consent":{"$ref":"#/components/schemas/ConsentRecord","description":"May be supplied here instead of recording first"},"published_post_ref":{"description":"External post ID/URL to attach","type":"string"}},"type":"object"}}}},"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Transformation"}}},"description":"Published transformation"},"401":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Unauthenticated"},"403":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Insufficient scope"},"404":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"Not found (or not owned by this stylist)"},"422":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}},"description":"CONSENT_REQUIRED or AFTER_PHOTO_REQUIRED. On CONSENT_REQUIRED, record consent first — do not retry blindly."}},"summary":"Publish a transformation"}}},"security":[{"bearerAuth":[]}],"servers":[{"description":"Production COLORgenius deployment (replace with the actual Vercel URL)","url":"https://YOUR_DEPLOYMENT_URL"}]}
+{
+  "components": {
+    "schemas": {
+      "ConsentRecord": {
+        "description": "Marketing consent attestation. attested_by and attested_at are server-derived from the authenticated stylist and current time.",
+        "properties": {
+          "attested_at": {
+            "description": "When consent was recorded (server-set)",
+            "format": "date-time",
+            "type": "string"
+          },
+          "attested_by": {
+            "description": "Stylist ID who recorded consent (server-set)",
+            "type": "string"
+          },
+          "client_ref": {
+            "description": "Opaque salon-side client identifier. No client PII.",
+            "nullable": true,
+            "type": "string"
+          },
+          "method": {
+            "enum": [
+              "verbal",
+              "signed",
+              "digital"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "type": "object"
+      },
+      "ConsultationFields": {
+        "description": "The 28 consultation fields. Keys are dotted paths. Levels are integers 1-10. Tones are single-letter codes: N=Neutral/Natural, A=Ash, G=Gold, K=Copper, R=Red, V=Violet, P=Pearl, B=Beige, M=Mahogany, Ch=Chocolate, W=Warm, C=Cool.",
+        "properties": {
+          "brandPreference": {
+            "type": "string"
+          },
+          "chemicalHistory": {
+            "description": "Prior chemical services",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "condition.banding": {
+            "type": "boolean"
+          },
+          "condition.colorGrab": {
+            "type": "boolean"
+          },
+          "condition.grayPercent": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "condition.greenCast": {
+            "type": "boolean"
+          },
+          "condition.highlightedPercent": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "condition.highlights": {
+            "type": "boolean"
+          },
+          "condition.hollowEnds": {
+            "type": "boolean"
+          },
+          "condition.hotRoots": {
+            "type": "boolean"
+          },
+          "condition.muddyToner": {
+            "type": "boolean"
+          },
+          "condition.multipleColors": {
+            "type": "boolean"
+          },
+          "condition.overAshy": {
+            "type": "boolean"
+          },
+          "condition.porosity": {
+            "enum": [
+              "low",
+              "normal",
+              "high"
+            ],
+            "type": "string"
+          },
+          "condition.previousLightener": {
+            "type": "boolean"
+          },
+          "condition.type": {
+            "description": "Hair condition (enum: virgin, bleached, gray_coverage, previously_colored, damaged, etc.)",
+            "type": "string"
+          },
+          "currentLevel": {
+            "description": "Current natural/starting level",
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "currentTone": {
+            "description": "Current tone letter code",
+            "type": "string"
+          },
+          "density": {
+            "enum": [
+              "thin",
+              "medium",
+              "thick"
+            ],
+            "type": "string"
+          },
+          "hairPattern": {
+            "enum": [
+              "straight",
+              "wavy",
+              "curly",
+              "coily"
+            ],
+            "type": "string"
+          },
+          "hairType": {
+            "description": "oily, normal, or dry",
+            "type": "string"
+          },
+          "lastChemicalService": {
+            "description": "Most recent chemical service (enum)",
+            "type": "string"
+          },
+          "linePreference": {
+            "type": "string"
+          },
+          "sensitivities": {
+            "description": "Allergies/sensitivities",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "serviceType": {
+            "description": "Service being performed (enum)",
+            "type": "string"
+          },
+          "targetLevel": {
+            "description": "Goal level",
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "targetTone": {
+            "description": "Goal tone letter code",
+            "type": "string"
+          },
+          "texture": {
+            "enum": [
+              "fine",
+              "medium",
+              "coarse"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Error": {
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Transformation": {
+        "properties": {
+          "after_photo_ref": {
+            "nullable": true,
+            "type": "string"
+          },
+          "after_photo_url": {
+            "description": "Short-lived (15 min) signed download URL",
+            "type": "string"
+          },
+          "before_photo_ref": {
+            "type": "string"
+          },
+          "before_photo_url": {
+            "description": "Short-lived (15 min) signed download URL",
+            "type": "string"
+          },
+          "client_consent": {
+            "$ref": "#/components/schemas/ConsentRecord",
+            "nullable": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enriched_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "formulation_id": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "published_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "published_post_ref": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shade_story": {
+            "nullable": true,
+            "type": "string"
+          },
+          "shades": {
+            "description": "Structured brands/shade names/tone/level",
+            "nullable": true,
+            "type": "object"
+          },
+          "source_formula_id": {
+            "description": "Marketplace listing used as starting point, if any",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "enriched",
+              "published"
+            ],
+            "type": "string"
+          },
+          "stylist_id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "description": "Per-stylist API token, issued in the COLORgenius dashboard (Settings > API tokens). Sent as Authorization: Bearer <token>. Tokens carry scopes: transformations:read, transformations:write. Enter the token via Muse's secure credential prompt \u2014 never paste it into chat.",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "COLORgenius is the AI formulation platform for professional hair colorists. This API is the thin-adapter surface for the Muse custom connector: it exposes the consultation, formulation, and transformation lifecycle. All intelligence (formulation engine, consent gates, publishing rules) lives in the COLORgenius backend \u2014 the connector is a dumb pipe.\n\nTHE CONSENT BRIGHT LINE: a transformation draft's existence never implies permission to publish. Publishing requires a separate marketing consent record. POST /transformations/{id}/publish returns 422 CONSENT_REQUIRED without one.\n\nNOTE: there is currently no GET /api/formulations/{id}. Formulation details are returned inline by POST /api/formulate (session auth) and referenced by formulation_id on transformations. A token-authenticated formulation read is a planned follow-up.",
+    "title": "COLORgenius Connector API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/consultation/dictate": {
+      "post": {
+        "description": "Accepts a stylist's dictated consultation transcript (produced by browser or Muse speech-to-text) and maps it onto the 28 consultation fields via structured AI output. Returns field updates plus a list of unmatched fragments the stylist should fill by hand. Every unanswered field is a guess at the chair \u2014 ask follow-ups for anything in `unmatched`. Usage is metered to the salon's invoice. Auth: session OR per-stylist API token.",
+        "operationId": "dictateConsultation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "currentFields": {
+                    "description": "Already-known field values (dotted keys) for context; only transcript-mentioned fields are updated",
+                    "type": "object"
+                  },
+                  "transcript": {
+                    "description": "The dictated consultation text",
+                    "maxLength": 2000,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "transcript"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "billing": {
+                      "properties": {
+                        "billedCents": {
+                          "type": "number"
+                        },
+                        "billedMinutes": {
+                          "type": "number"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "unmatched": {
+                      "description": "Transcript fragments that could not be mapped \u2014 ask the stylist about these",
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "updates": {
+                      "$ref": "#/components/schemas/ConsultationFields"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Mapped field updates"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request or account not linked to a salon"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthenticated"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "AI mapping unavailable (key not configured) \u2014 fall back to manual field entry"
+          }
+        },
+        "summary": "Map a spoken consultation transcript onto consultation fields"
+      }
+    },
+    "/api/v1/transformations": {
+      "get": {
+        "description": "List the stylist's own transformations (any status) plus published transformations from others. Powers showcase curation and attribution queries. Requires transformations:read scope (included in :write).",
+        "operationId": "listTransformations",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                "draft",
+                "enriched",
+                "published"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by source marketplace formula",
+            "in": "query",
+            "name": "formula_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stylist_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/Transformation"
+                      },
+                      "type": "array"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Paginated list"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient scope"
+          }
+        },
+        "summary": "List/search transformations"
+      },
+      "post": {
+        "description": "Creates a draft transformation at formulation time. A draft is created automatically by the formulation flow, and this endpoint is idempotent per formulation \u2014 if a draft already exists for the formulation, it is returned instead of duplicating. Requires transformations:write scope.",
+        "operationId": "createTransformation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "before_photo_ref": {
+                    "description": "R2 key/URL of the assessment (before) photo",
+                    "type": "string"
+                  },
+                  "formulation_id": {
+                    "description": "The finalized formulation (must belong to this stylist)",
+                    "type": "string"
+                  },
+                  "shade_story": {
+                    "type": "string"
+                  },
+                  "shades": {
+                    "description": "Structured brands/shade names/tone/level",
+                    "type": "object"
+                  },
+                  "source_formula_id": {
+                    "description": "Marketplace listing used as starting point, if any",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "formulation_id",
+                  "before_photo_ref"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transformation"
+                }
+              }
+            },
+            "description": "Draft created (or existing draft returned)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing required fields or bad source_formula_id"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks transformations:write scope"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Formulation not found (or not owned by this stylist)"
+          }
+        },
+        "summary": "Create a transformation draft"
+      }
+    },
+    "/api/v1/transformations/{id}": {
+      "get": {
+        "description": "The owner sees everything including the consent record and signed photo URLs (15-minute expiry). Non-owners only see published records with consent stripped. Requires transformations:read scope.",
+        "operationId": "getTransformation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transformation"
+                }
+              }
+            },
+            "description": "The transformation"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient scope"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not found (or not visible to this stylist)"
+          }
+        },
+        "summary": "Read a transformation"
+      },
+      "patch": {
+        "description": "Attach the after photo, shade story, and structured shades. draft becomes enriched when after_photo_ref is present. On published records only published_post_ref may change (returns 422 IMMUTABLE_AFTER_PUBLISH otherwise). Requires transformations:write scope.",
+        "operationId": "enrichTransformation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "after_photo_ref": {
+                    "description": "R2 key/URL of the after photo",
+                    "type": "string"
+                  },
+                  "client_consent": {
+                    "$ref": "#/components/schemas/ConsentRecord",
+                    "description": "Alternative to the dedicated consent endpoint"
+                  },
+                  "published_post_ref": {
+                    "type": "string"
+                  },
+                  "shade_story": {
+                    "type": "string"
+                  },
+                  "shades": {
+                    "type": "object"
+                  },
+                  "source_formula_id": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transformation"
+                }
+              }
+            },
+            "description": "Updated transformation"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid input"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient scope"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not found (or not owned by this stylist)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "IMMUTABLE_AFTER_PUBLISH \u2014 only published_post_ref may change on published records"
+          }
+        },
+        "summary": "Enrich a transformation draft"
+      }
+    },
+    "/api/v1/transformations/{id}/consent": {
+      "post": {
+        "description": "Records the client's marketing consent attestation. Combine with the after-photo ask: 'Got the after photo \u2014 did the client agree to us sharing it?' Photo + consent in one breath. attested_by and attested_at are server-derived from the authenticated stylist. IDEMPOTENT-OVERWRITE: recording consent twice updates the record (last attestation wins, e.g. verbal upgraded to signed) \u2014 never 409. This matches PATCH behavior. Recording consent does NOT publish; publishing is a separate step. Requires transformations:write scope.",
+        "operationId": "recordConsent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "client_ref": {
+                    "description": "Opaque salon-side client identifier. No client PII.",
+                    "type": "string"
+                  },
+                  "method": {
+                    "description": "How consent was obtained",
+                    "enum": [
+                      "verbal",
+                      "signed",
+                      "digital"
+                    ],
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "method"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transformation"
+                }
+              }
+            },
+            "description": "Consent recorded (returns the transformation)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid method or malformed body"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient scope"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not found (or not owned by this stylist)"
+          }
+        },
+        "summary": "Record marketing consent for a transformation"
+      }
+    },
+    "/api/v1/transformations/{id}/publish": {
+      "post": {
+        "description": "Flips a transformation to published. HARD REQUIREMENTS: the after photo must be attached (else 422 AFTER_PHOTO_REQUIRED) and a marketing consent record must exist \u2014 on the record or in this call's body (else 422 CONSENT_REQUIRED). The draft's existence never implies posting permission. IDEMPOTENT: republishing returns the record as-is (updating published_post_ref when supplied) \u2014 safe to retry. Always require the stylist's approval before calling this. Requires transformations:write scope.",
+        "operationId": "publishTransformation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "client_consent": {
+                    "$ref": "#/components/schemas/ConsentRecord",
+                    "description": "May be supplied here instead of recording first"
+                  },
+                  "published_post_ref": {
+                    "description": "External post ID/URL to attach",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transformation"
+                }
+              }
+            },
+            "description": "Published transformation"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient scope"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not found (or not owned by this stylist)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "CONSENT_REQUIRED or AFTER_PHOTO_REQUIRED. On CONSENT_REQUIRED, record consent first \u2014 do not retry blindly."
+          }
+        },
+        "summary": "Publish a transformation"
+      }
+    },
+    "/api/v1/formulations/{id}": {
+      "get": {
+        "summary": "Read a formulation",
+        "description": "Retrieve a single formulation by ID, scoped to the authenticated stylist. Returns shades, mixing ratios, developer volume, application order, and processing_instructions \u2014 the formula-aware staged check intervals that drive the processing reminders (e.g. check mids at 20 min, pull at 35). Use this after colorgenius_submit_consultation returns a formulation ID, or to re-read the formulation mid-service.",
+        "operationId": "getFormulation",
+        "tags": [
+          "formulations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Formulation ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The formulation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized \u2014 missing or invalid token"
+          },
+          "404": {
+            "description": "Not found (or belongs to another stylist)"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "description": "Production COLORgenius deployment (replace with the actual Vercel URL)",
+      "url": "https://YOUR_DEPLOYMENT_URL"
+    }
+  ],
+  "tags": [
+    {
+      "name": "formulations",
+      "description": "AI-generated color formulations"
+    }
+  ]
+}
