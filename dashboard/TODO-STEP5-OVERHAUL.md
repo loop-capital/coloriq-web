@@ -135,7 +135,7 @@ Stylists capture photos on their phones but run ColorIq on the salon's iPad. Nee
 
 **Flow:**
 1. iPad shows a 4-digit session code (auto-generated per active formulation session)
-2. Stylist goes to `coloriq.co/c` on their phone (short URL, easy to type)
+2. Stylist goes to `getCOLORiq.co/c` on their phone (short URL, easy to type)
 3. Enters the 4-digit code
 4. Uploads the hair photo
 5. Photo appears on iPad instantly in that formulation session

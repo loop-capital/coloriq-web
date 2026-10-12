@@ -55,7 +55,7 @@ export default function PrivacyPolicy() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">7. Contact</h2>
-            <p>For privacy questions, contact us at: privacy@coloriq.co</p>
+            <p>For privacy questions, contact us at: privacy@getCOLORiq.co</p>
           </section>
         </div>
 

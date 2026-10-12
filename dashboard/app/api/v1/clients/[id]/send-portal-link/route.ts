@@ -57,7 +57,7 @@ export async function POST(
     }
 
     const stylistName = client.stylists?.display_name || client.stylists?.first_name || 'Your stylist'
-    const portalUrl = `https://coloriq.co/c/${token}`
+    const portalUrl = `https://getCOLORiq.co/c/${token}`
 
     const message = `Hi ${client.first_name}! ${stylistName} has shared your color history with you. View your before/after photos, formula details, and care tips: ${portalUrl}`
 

@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       await prisma.salons.update({ where: { id: salonId }, data: { square_customer_id: squareCustomerId } });
     }
 
-    const appBaseUrl = process.env.APP_BASE_URL || 'https://coloriq.co';
+    const appBaseUrl = process.env.APP_BASE_URL || 'https://getCOLORiq.co';
     const paymentLink = await createPaymentLink({
       referenceId: `bs:${salonId}`,
       name: 'Card verification for formula license billing',

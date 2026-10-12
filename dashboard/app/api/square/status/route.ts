@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Return connect URL if not connected
-  const redirectUri = `${request.headers.get('origin') || 'https://coloriq.co'}/api/square/oauth/callback`;
+  const redirectUri = `${request.headers.get('origin') || 'https://getCOLORiq.co'}/api/square/oauth/callback`;
   const authUrl = getAuthUrl(salonId, redirectUri);
 
   return NextResponse.json({

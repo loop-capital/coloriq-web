@@ -742,7 +742,7 @@ function FormulatePageContent() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 12, color: '#71717A' }}>Phone upload code:</span>
                       <span style={{ fontSize: 18, fontWeight: 700, letterSpacing: 4, color: '#9333EA', fontFamily: 'monospace' }}>{sessionCode}</span>
-                      <span style={{ fontSize: 11, color: '#71717A' }}>→ coloriq.co/c</span>
+                      <span style={{ fontSize: 11, color: '#71717A' }}>→ getCOLORiq.co/c</span>
                       <button type="button" onClick={checkPhoneUpload} disabled={checkingPhoto} style={{ fontSize: 12, color: '#9333EA', background: 'none', border: 'none', cursor: checkingPhoto ? 'wait' : 'pointer', textDecoration: 'underline' }}>
                         {checkingPhoto ? 'Checking…' : 'Check for upload'}
                       </button>

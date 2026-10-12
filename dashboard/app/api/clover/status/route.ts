@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const redirectUri = `${request.headers.get('origin') || 'https://coloriq.co'}/api/clover/oauth/callback`;
+  const redirectUri = `${request.headers.get('origin') || 'https://getCOLORiq.co'}/api/clover/oauth/callback`;
   return NextResponse.json({
     success: true,
     data: { connected: false, connect_url: getAuthUrl(salonId, redirectUri) },

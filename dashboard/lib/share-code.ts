@@ -45,7 +45,7 @@ export function generateShareCode(formulaId: string): string {
  * Generate a full share URL
  */
 export function getShareUrl(shareCode: string): string {
-  return `https://coloriq.co/f/${shareCode}`;
+  return `https://getCOLORiq.co/f/${shareCode}`;
 }
 
 /**
