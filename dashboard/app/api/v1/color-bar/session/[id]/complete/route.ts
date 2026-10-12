@@ -186,6 +186,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       itemId: string
     }[] = []
 
+    let totalWasteGrams = 0
+    let totalWasteCost = 0
+
     for (const step of steps) {
       if (alreadyDeducted) continue
       if (!step.brand || !step.shadeCode) continue
@@ -256,6 +259,52 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           quantityAfter,
           itemId: item.id,
         })
+
+        // ── Waste tracking: over-mixed product (target - actual) ──────────
+        // If the stylist mixed more than was applied, the excess also left
+        // the tube — record it as a waste transaction so inventory stays
+        // accurate and the waste dashboard has real data.
+        const wasteGrams = Math.max((step.targetGrams || 0) - gramsUsed, 0)
+        if (wasteGrams >= 0.5) {
+          const wasteQty = Math.round(wasteGrams)
+          const wasteBefore = quantityAfter
+          const wasteAfter = Math.max(wasteBefore - wasteQty, 0)
+          const costPerGram = item.cost_per_unit != null ? Number(item.cost_per_unit) : null
+
+          await prisma.inventory_items.update({
+            where: { id: item.id },
+            data: { quantity_on_hand: wasteAfter, updated_at: new Date() },
+          })
+
+          await prisma.inventory_transactions.create({
+            data: {
+              salon_id: item.salon_id,
+              item_id: item.id,
+              transaction_type: 'waste',
+              quantity_change: -wasteQty,
+              quantity_before: wasteBefore,
+              quantity_after: wasteAfter,
+              unit_cost: costPerGram != null ? new Decimal(costPerGram) : null,
+              total_cost: costPerGram != null ? new Decimal(costPerGram * wasteQty) : null,
+              reason: 'Color Bar session waste',
+              reference_type: 'color_bar_session',
+              reference_id: id,
+              performed_by: stylistId || undefined,
+              notes: `Wasted ${wasteQty}g of ${step.brand} ${step.shadeCode} (mixed ${step.targetGrams}g, applied ${gramsUsed}g).`,
+            },
+          })
+
+          stockUpdates.push({
+            brand: step.brand,
+            shadeCode: step.shadeCode,
+            quantityUsed: wasteQty,
+            quantityBefore: wasteBefore,
+            quantityAfter: wasteAfter,
+            itemId: item.id,
+          })
+          totalWasteGrams += wasteQty
+          if (costPerGram != null) totalWasteCost += costPerGram * wasteQty
+        }
       }
     }
 
@@ -274,6 +323,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       stepsCount: steps.length,
       totalGrams: steps.reduce((sum: number, s: CompletedStep) => sum + s.actualGrams, 0),
       stockUpdates,
+      totalWasteGrams,
+      totalWasteCost: Math.round(totalWasteCost * 100) / 100,
       formulaSaved: createClientFormula && !!sessionClientId,
       usageLogged: !!salonId,
     })

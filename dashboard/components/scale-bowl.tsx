@@ -108,6 +108,81 @@ const LIQUID_BOTTOM_Y = BOWL_BOTTOM_Y - 4;
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
+// ─── Live Weigh Guidance ─────────────────────────────────────────────────────
+// Shows "Add {shade} until {target}" with a live progress bar driven by the
+// scale's real-time weight. Turns green when within ±1g tolerance so the
+// stylist knows exactly when to stop pouring and hit capture.
+function LiveWeighGuidance({
+  ingredient,
+  liveGrams,
+  convertWeight,
+  unitLabel,
+}: {
+  ingredient: BowlIngredient;
+  liveGrams: number;
+  convertWeight: (g: number) => string;
+  unitLabel: string;
+}) {
+  const target = ingredient.targetGrams || 0;
+  const TOLERANCE = 1; // grams
+  const diff = liveGrams - target;
+  const inTolerance = Math.abs(diff) <= TOLERANCE;
+  const progress = target > 0 ? Math.min(1, Math.max(0, liveGrams / target)) : 0;
+  const remaining = Math.max(0, target - liveGrams);
+
+  return (
+    <div
+      className="w-full mb-3 p-3 rounded-2xl"
+      style={{
+        background: inTolerance ? 'rgba(16,185,129,0.08)' : 'rgba(147,51,234,0.06)',
+        border: inTolerance ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(147,51,234,0.2)',
+        transition: 'background 0.2s, border 0.2s',
+      }}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-semibold" style={{ color: inTolerance ? '#10B981' : '#A855F7' }}>
+          {inTolerance ? (
+            <>✓ On target — capture now</>
+          ) : (
+            <>Add {ingredient.shadeCode} until {convertWeight(target)}{unitLabel}</>
+          )}
+        </p>
+        <p className="text-xs font-mono font-bold" style={{ color: inTolerance ? '#10B981' : 'var(--cg-text-primary)' }}>
+          {convertWeight(Math.round(liveGrams * 10) / 10)}{unitLabel}
+          <span className="font-normal" style={{ color: '#71717A' }}>
+            {' / '}{convertWeight(target)}{unitLabel}
+          </span>
+        </p>
+      </div>
+      {/* Progress bar */}
+      <div
+        className="w-full h-2 rounded-full overflow-hidden"
+        style={{ background: 'rgba(255,255,255,0.06)' }}
+      >
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${progress * 100}%`,
+            background: inTolerance
+              ? 'linear-gradient(90deg, #10B981, #34D399)'
+              : diff > 0
+                ? 'linear-gradient(90deg, #F59E0B, #EF4444)'
+                : 'linear-gradient(90deg, #9333EA, #EC4899)',
+            transition: 'width 0.15s ease-out, background 0.2s',
+          }}
+        />
+      </div>
+      {!inTolerance && (
+        <p className="text-[11px] mt-1.5" style={{ color: diff > 0 ? '#F59E0B' : '#71717A' }}>
+          {diff > 0
+            ? `${convertWeight(Math.round(diff * 10) / 10)}${unitLabel} over — remove a little`
+            : `${convertWeight(Math.round(remaining * 10) / 10)}${unitLabel} to go`}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function ScaleBowl({
   ingredients,
   salonId,
@@ -506,6 +581,16 @@ export function ScaleBowl({
           )}
         </AnimatePresence>
       </div>
+
+      {/* ─── Live weigh guidance: "add until target" ──────────────────────── */}
+      {!isComplete && currentIngredient && connected && weight && weight.value > 0 && (
+        <LiveWeighGuidance
+          ingredient={currentIngredient}
+          liveGrams={weight.value}
+          convertWeight={convertWeight}
+          unitLabel={unitLabel}
+        />
+      )}
 
       {/* ─── Ingredient cards (matching Vish below-bowl style) ─────────────── */}
       {!isComplete && (
