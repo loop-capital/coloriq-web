@@ -75,7 +75,7 @@ class ColorConverter:
                 rgb_r=rgb.r / 255.0,
                 rgb_g=rgb.g / 255.0,
                 rgb_b=rgb.b / 255.0,
-                is_upscaled=True,
+                is_upscaled=False,
             )
 
             # Convert to Lab

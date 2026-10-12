@@ -132,7 +132,7 @@ class FormulationInput:
     @property
     def lift_required(self) -> int:
         """Calculate lift required."""
-        return max(0, self.target.level - self.current.level)
+        return self.target.level - self.current.level
 
 
 @dataclass

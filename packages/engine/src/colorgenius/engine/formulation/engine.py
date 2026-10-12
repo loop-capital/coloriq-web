@@ -266,8 +266,13 @@ class FormulationEngine:
                         )
                     )
 
-            # Adjust for gray coverage
-            if input_data.client.gray_percentage > 30:
+            # Adjust for gray coverage per book's ratio rules (Ch 8):
+            # 30-75% grey -> 75% N + 25% tone, 75%+ grey -> 80% N + 20% tone
+            gray_pct = input_data.client.gray_percentage
+            if gray_pct > 30:
+                natural_ratio = 0.80 if gray_pct >= 75 else 0.75
+                current_total = sum(c.amount_oz for c in components)
+                natural_amt = round(natural_ratio * current_total / (1 - natural_ratio), 2)
                 natural = self.db.find_natural_shade(
                     product_line.code, input_data.target.level
                 )
@@ -276,7 +281,7 @@ class FormulationEngine:
                         FormulaComponent(
                             shade_code=natural.shade_code,
                             shade_name=natural.shade_name,
-                            amount_oz=0.5,
+                            amount_oz=natural_amt,
                             purpose="gray_coverage",
                         )
                     )

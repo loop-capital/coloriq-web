@@ -427,6 +427,7 @@ Remaining: Analyze, Library, History, Questionnaire
 ---
 
 ## Recent Research
+- 2026-10-12: Research (categories 2, 3, 5 2014 market/patent/competitor), 5 findings, see research/findings-2026-10-12.md
 - 2026-10-08: Research (categories 5, 6, competitor intel), 5 findings, see research/findings-2026-10-08.md
 
 ---
