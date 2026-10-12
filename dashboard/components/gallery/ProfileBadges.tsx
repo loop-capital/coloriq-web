@@ -26,16 +26,16 @@ export const BADGE_CONFIG: Record<string, {
     color: '#F59E0B',
     border: 'rgba(245,158,11,0.3)',
     icon: '⭐',
-    description: 'Founding beta tester — helped shape ColorGenius',
+    description: 'Founding beta tester — helped shape ColorIq',
   },
-  'colorgenius-certified': {
-    label: 'ColorGenius Certified',
+  'coloriq-certified': {
+    label: 'ColorIq Certified',
     shortLabel: 'CGC',
     bg: 'linear-gradient(135deg, rgba(147,51,234,0.2), rgba(236,72,153,0.2))',
     color: '#9333EA',
     border: 'rgba(147,51,234,0.3)',
     icon: '✦',
-    description: 'Completed ColorGenius certification program',
+    description: 'Completed ColorIq certification program',
   },
   'verified-colorist': {
     label: 'Verified Colorist',

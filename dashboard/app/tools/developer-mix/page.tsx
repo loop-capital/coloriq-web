@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { DeveloperMixCalculator } from "@/components/tools/DeveloperMixCalculator";
 
 export const metadata: Metadata = {
-  title: "Developer Mix Calculator | ColorGenius",
-  description: "Calculate the exact developer volume, mix ratio, and processing time for professional hair color services. Free salon tool by ColorGenius.",
+  title: "Developer Mix Calculator | ColorIq",
+  description: "Calculate the exact developer volume, mix ratio, and processing time for professional hair color services. Free salon tool by ColorIq.",
   openGraph: {
-    title: "Developer Mix Calculator | ColorGenius",
+    title: "Developer Mix Calculator | ColorIq",
     description: "Instant developer-to-color ratio for any hair color service.",
   },
 };

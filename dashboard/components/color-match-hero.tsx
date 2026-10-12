@@ -136,7 +136,7 @@ export default function ColorMatchHero({ onMatchComplete }: ColorMatchHeroProps)
             Find Your Color Match
           </h2>
           <p className="text-white/50 text-lg max-w-lg mx-auto">
-            Upload any hair inspiration photo and get an instant COLORgenius formula match
+            Upload any hair inspiration photo and get an instant COLORiq formula match
           </p>
         </motion.div>
       </div>

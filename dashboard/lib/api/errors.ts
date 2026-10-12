@@ -1,5 +1,5 @@
 /**
- * ColorGenius API Error Handling
+ * ColorIq API Error Handling
  * Standardized error format for all API responses
  */
 

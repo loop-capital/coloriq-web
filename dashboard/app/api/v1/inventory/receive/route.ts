@@ -8,7 +8,7 @@ import { defaultContainerGrams } from "@/lib/inventory/container-defaults";
 /**
  * POST /api/v1/inventory/receive
  * Manual "I opened/received a new container" entry — the gram-native
- * baseline ColorGenius relies on instead of Square's per-bottle count
+ * baseline ColorIq relies on instead of Square's per-bottle count
  * (which is a different, incompatible unit). Matches Vish's own onboarding
  * flow: a manual stock count/entry to establish real gram numbers, since
  * neither Square's catalog nor a distributor order exposes container

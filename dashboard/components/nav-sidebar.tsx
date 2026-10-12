@@ -8,7 +8,7 @@ import {
   ShieldCheck, Store, Banknote, Droplets, Calculator, Sparkles, Palette, Droplet,
 } from 'lucide-react'
 import { LogoutButton } from '@/components/ui/logout-button'
-import { ColorGeniusLogo } from '@/components/icons/colorgenius-logo'
+import { ColorIqLogo } from '@/components/icons/coloriq-logo'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -61,9 +61,9 @@ export function Sidebar() {
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg, #9333EA, #EC4899)', borderRadius: '10px' }}>
-              <ColorGeniusLogo size={36} color="#0A0A0F" />
+              <ColorIqLogo size={36} color="#0A0A0F" />
             </div>
-            <span className="font-bold text-lg tracking-tight" style={{ color: '#F5F5F7' }}>ColorGenius</span>
+            <span className="font-bold text-lg tracking-tight" style={{ color: '#F5F5F7' }}>ColorIq</span>
           </Link>
         </div>
 
@@ -140,9 +140,9 @@ export function Sidebar() {
           <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg, #9333EA, #EC4899)', borderRadius: '8px' }}>
-              <ColorGeniusLogo size={30} color="#0A0A0F" />
+              <ColorIqLogo size={30} color="#0A0A0F" />
             </div>
-            <span className="font-bold text-sm" style={{ color: '#F5F5F7' }}>ColorGenius</span>
+            <span className="font-bold text-sm" style={{ color: '#F5F5F7' }}>ColorIq</span>
           </Link>
           <Link href="/login"
             className="px-4 py-2 rounded-lg text-xs font-semibold transition-opacity hover:opacity-90"

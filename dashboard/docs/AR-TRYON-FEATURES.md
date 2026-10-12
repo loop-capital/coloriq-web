@@ -1,8 +1,8 @@
-# ColorGenius AR Try-On — Feature Documentation
+# ColorIq AR Try-On — Feature Documentation
 
 ## Overview
 
-ColorGenius AR Try-On is a real-time virtual hair color preview system designed for professional salon use. It enables colorists and clients to visualize hair color results before application, reducing consultation time and increasing client confidence.
+ColorIq AR Try-On is a real-time virtual hair color preview system designed for professional salon use. It enables colorists and clients to visualize hair color results before application, reducing consultation time and increasing client confidence.
 
 ---
 
@@ -206,4 +206,4 @@ For brand partners (Davines, Lanza):
 
 ---
 
-*Last updated: 2026-05-09 by Iris (ColorGenius CEO)*
+*Last updated: 2026-05-09 by Iris (ColorIq CEO)*

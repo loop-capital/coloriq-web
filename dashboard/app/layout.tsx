@@ -4,7 +4,7 @@ import { ConditionalLayout } from "./conditional-layout"
 import { ServiceWorkerRegistration } from "@/components/sw-registration"
 
 export const metadata: Metadata = {
-  title: "ColorGenius — Stop Guessing. Start Formulating.",
+  title: "ColorIq — Stop Guessing. Start Formulating.",
   description: "AI-powered hair color formulation for professional stylists.",
 }
 

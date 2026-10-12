@@ -1,11 +1,11 @@
-# ColorGenius Voice Assistant
+# ColorIq Voice Assistant
 ### AI-Powered Bowl-Side Consultation
 
 ---
 
 ## What It Is
 
-A push-to-talk voice assistant built into ColorGenius that answers formulation questions in real-time — right at the bowl, while your hands are in gloves.
+A push-to-talk voice assistant built into ColorIq that answers formulation questions in real-time — right at the bowl, while your hands are in gloves.
 
 **Tap the mic → Ask your question → Get an answer in 2-3 seconds.**
 
@@ -15,7 +15,7 @@ No typing. No searching. No leaving the client.
 
 ## What It Knows
 
-The ColorGenius Voice Assistant isn't a generic chatbot. It's a **color science consultant** trained on:
+The ColorIq Voice Assistant isn't a generic chatbot. It's a **color science consultant** trained on:
 
 - **3,273 professional shades** across 21 brands and 40+ color lines
 - **Brand-specific processing times** — knows the difference between Shades EQ and Igora Royal
@@ -51,7 +51,7 @@ The ColorGenius Voice Assistant isn't a generic chatbot. It's a **color science 
 
 ## What Makes It Different
 
-| Other Tools | ColorGenius Voice Assistant |
+| Other Tools | ColorIq Voice Assistant |
 |-------------|---------------------------|
 | Requires typing | Voice-first, hands-free |
 | Generic AI answers | Color science trained on 367 shades |
@@ -112,7 +112,7 @@ No salon tool does contextual voice consultation at the bowl.
 - **ReFa** — No voice. No AI consultation.
 - **Vish** — No voice. No AI.
 - **SalonScale** — No voice. No formulation engine.
-- **ColorGenius** — Voice + AI + shade DB + client history + formulation engine.
+- **ColorIq** — Voice + AI + shade DB + client history + formulation engine.
 
 *This is the feature that makes stylists say "I can't work without this."*
 
@@ -120,7 +120,7 @@ No salon tool does contextual voice consultation at the bowl.
 
 ## Getting Started
 
-1. Sign up at ColorGenius
+1. Sign up at ColorIq
 2. Select your brands and color lines
 3. Enable Voice Assistant in settings
 4. Tap the mic button
@@ -130,4 +130,4 @@ No salon tool does contextual voice consultation at the bowl.
 
 ---
 
-*ColorGenius — AI color consultation, bowl-side.*
+*ColorIq — AI color consultation, bowl-side.*

@@ -53,7 +53,7 @@ export async function pushSessionToConnectedPos(salonId: string, sessionId: stri
       basePriceMoney: { amount: BigInt(Math.round(s.clientCost * 100)), currency: 'USD' as const },
     }))
     const response = await squareClient.orders.create({
-      order: { locationId: squareConn.location_ids[0], lineItems, state: 'OPEN', source: { name: 'COLORgenius Color Bar' } },
+      order: { locationId: squareConn.location_ids[0], lineItems, state: 'OPEN', source: { name: 'COLORiq Color Bar' } },
       idempotencyKey: `colorbar-${sessionId}-${Date.now()}`,
     })
     const order = response.order

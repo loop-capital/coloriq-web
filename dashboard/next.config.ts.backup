@@ -18,7 +18,7 @@ module.exports = withSentryConfig(nextConfig, {
 
   // Suppresses source map uploading logs during build
   silent: true,
-  org: "colorgenius",
+  org: "coloriq",
   project: "javascript",
 
   // Only print logs for uploading source maps in debug mode

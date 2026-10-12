@@ -76,13 +76,13 @@ export async function POST(request: NextRequest) {
       await prisma.salons.update({ where: { id: salonId }, data: { square_customer_id: squareCustomerId } });
     }
 
-    const appBaseUrl = process.env.APP_BASE_URL || 'https://colorgenius.co';
+    const appBaseUrl = process.env.APP_BASE_URL || 'https://getCOLORiq.co';
     const paymentLink = await createPaymentLink({
       referenceId: `bs:${salonId}`,
       name: 'Card verification for formula license billing',
       amountCents: VERIFICATION_CHARGE_CENTS,
       redirectUrl: `${appBaseUrl}/settings?billing_setup=complete`,
-      note: 'ColorGenius formula license billing — card verification',
+      note: 'ColorIq formula license billing — card verification',
     });
 
     if (!paymentLink?.url) {

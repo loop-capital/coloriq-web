@@ -2,7 +2,7 @@
  * GET /api/assistant — is the voice assistant enabled for my salon?
  * There is deliberately no PUT here: enabling this is admin-only (see
  * POST /api/v1/admin/salons/:salonId/voice-assistant) since it's a real
- * per-use OpenAI cost — a salon opts in by asking ColorGenius, not by
+ * per-use OpenAI cost — a salon opts in by asking ColorIq, not by
  * flipping their own switch.
  */
 

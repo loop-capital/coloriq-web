@@ -178,7 +178,7 @@ export default function SettingsContent() {
                   <p className="text-xs" style={{ color: '#71717A' }}>
                     {clientSyncResult
                       ? `Last import: ${clientSyncResult.imported} new, ${clientSyncResult.updated} updated`
-                      : 'Import your Square customer list into COLORgenius'}
+                      : 'Import your Square customer list into COLORiq'}
                   </p>
                   <button onClick={handleClientSync} disabled={clientSyncing}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
@@ -219,7 +219,7 @@ export default function SettingsContent() {
             <div>
               <p className="text-sm mb-4" style={{ color: '#A1A1AA' }}>Connect your Square account to pull in your product catalog and client list.</p>
               <div className="space-y-2 mb-4">
-                {['Pull your product catalog and stock counts into COLORgenius', 'Import your Square client list', 'In-app low-stock notice when a formula uses up your last synced stock'].map((f, i) => (
+                {['Pull your product catalog and stock counts into COLORiq', 'Import your Square client list', 'In-app low-stock notice when a formula uses up your last synced stock'].map((f, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#10B981' }} />
                     <span className="text-sm" style={{ color: '#A1A1AA' }}>{f}</span>
@@ -235,7 +235,7 @@ export default function SettingsContent() {
                 style={{ background: '#006AFF', color: '#FFFFFF' }}>
                 <CreditCard className="w-4 h-4" /> Connect Square <ArrowRight className="w-4 h-4" />
               </a>
-              <p className="text-[10px] mt-3" style={{ color: '#71717A' }}>You&apos;ll be redirected to Square to authorize COLORgenius. We request read access to your catalog, inventory, customers, and orders, and write access to orders (for Color Bar checkout).</p>
+              <p className="text-[10px] mt-3" style={{ color: '#71717A' }}>You&apos;ll be redirected to Square to authorize COLORiq. We request read access to your catalog, inventory, customers, and orders, and write access to orders (for Color Bar checkout).</p>
             </div>
           )}
         </div>

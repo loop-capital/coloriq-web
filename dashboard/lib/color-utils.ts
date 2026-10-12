@@ -1,4 +1,4 @@
-// Color utility functions for ColorGenius
+// Color utility functions for ColorIq
 // Extracted from formulate-content.tsx + ADR-013 Visual Outcome Simulator algorithms
 
 import { ToneFamily, HAIR_LEVELS } from './products';

@@ -8,7 +8,7 @@ export default function PrivacyPolicy() {
         <div className="space-y-8 text-white/80 leading-relaxed">
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">1. Information We Collect</h2>
-            <p>ColorGenius collects information you provide directly, including:</p>
+            <p>ColorIq collects information you provide directly, including:</p>
             <ul className="list-disc ml-6 mt-2 space-y-1">
               <li>Account information (name, email, password)</li>
               <li>Client hair photos submitted for color analysis</li>
@@ -55,12 +55,12 @@ export default function PrivacyPolicy() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">7. Contact</h2>
-            <p>For privacy questions, contact us at: privacy@colorgenius.co</p>
+            <p>For privacy questions, contact us at: privacy@getCOLORiq.co</p>
           </section>
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/10">
-          <a href="/" className="text-purple-400 hover:text-purple-300">← Back to ColorGenius</a>
+          <a href="/" className="text-purple-400 hover:text-purple-300">← Back to ColorIq</a>
         </div>
       </div>
     </div>

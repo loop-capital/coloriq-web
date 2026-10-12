@@ -258,7 +258,7 @@ export interface PhorestCsvExportJob {
   updatedAt?: string;
 }
 
-// ── COLORgenius Mapped Types ──
+// ── COLORiq Mapped Types ──
 export interface PhorestSyncedClient {
   phorest_client_id: string;
   first_name: string;

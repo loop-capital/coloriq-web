@@ -43,13 +43,13 @@ export async function GET(req: NextRequest) {
       : 0
 
     // Check assessment status (stored in badges if passed)
-    const assessmentPassed = stylist.badges.includes('assessment-passed') || stylist.badges.includes('colorgenius-certified')
+    const assessmentPassed = stylist.badges.includes('assessment-passed') || stylist.badges.includes('coloriq-certified')
 
     // Build requirements
     const formulations = {
       id: 'formulations',
       label: 'Formulations Created',
-      description: 'Create at least 25 formulations in ColorGenius',
+      description: 'Create at least 25 formulations in ColorIq',
       target: 25,
       current: stylist.formulations_generated || 0,
       unit: '',
@@ -100,14 +100,14 @@ export async function GET(req: NextRequest) {
 
     // Check if fully certified
     const allComplete = requirements.every(r => r.current >= r.target)
-    const isCertified = stylist.badges.includes('colorgenius-certified') || allComplete
+    const isCertified = stylist.badges.includes('coloriq-certified') || allComplete
 
     // Auto-award badge if all requirements met
-    if (allComplete && !stylist.badges.includes('colorgenius-certified')) {
+    if (allComplete && !stylist.badges.includes('coloriq-certified')) {
       await prisma.stylists.update({
         where: { id: userId },
         data: {
-          badges: { push: 'colorgenius-certified' },
+          badges: { push: 'coloriq-certified' },
         },
       })
     }

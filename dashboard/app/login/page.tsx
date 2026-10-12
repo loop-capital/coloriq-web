@@ -65,7 +65,7 @@ export default function LoginPage() {
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-black text-lg">CG</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Sign in to ColorGenius</h1>
+          <h1 className="text-2xl font-bold text-white">Sign in to ColorIq</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

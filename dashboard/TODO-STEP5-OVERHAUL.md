@@ -1,4 +1,4 @@
-# ColorGenius — Full Platform Scope
+# ColorIq — Full Platform Scope
 
 > **Date:** 2026-05-12
 > **Priority:** P0 — Core platform build
@@ -131,11 +131,11 @@ Each time a formula is applied to a client, the creator gets paid. One purchase 
 - `app/library/page.tsx` — show per-use pricing on community formulas
 
 ### 8. Phone-to-iPad Session Codes
-Stylists capture photos on their phones but run ColorGenius on the salon's iPad. Need a bridge.
+Stylists capture photos on their phones but run ColorIq on the salon's iPad. Need a bridge.
 
 **Flow:**
 1. iPad shows a 4-digit session code (auto-generated per active formulation session)
-2. Stylist goes to `colorgenius.co/c` on their phone (short URL, easy to type)
+2. Stylist goes to `getCOLORiq.co/c` on their phone (short URL, easy to type)
 3. Enters the 4-digit code
 4. Uploads the hair photo
 5. Photo appears on iPad instantly in that formulation session

@@ -380,7 +380,7 @@ export function useCamera() {
   const saveToGallery = useCallback((dataUrl: string) => {
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = `colorgenius-${session.currentSection}-${Date.now()}.jpg`;
+    link.download = `coloriq-${session.currentSection}-${Date.now()}.jpg`;
     link.click();
   }, [session.currentSection]);
 

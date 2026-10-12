@@ -1,5 +1,5 @@
 /**
- * ColorGenius API Shared Types
+ * ColorIq API Shared Types
  * Standard response format and domain types
  */
 

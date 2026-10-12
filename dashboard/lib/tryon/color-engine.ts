@@ -1,5 +1,5 @@
 /**
- * ColorGenius AR Try-On Color Engine
+ * ColorIq AR Try-On Color Engine
  * 
  * Handles realistic color blending, hair texture preservation,
  * and natural-looking color application on hair regions.

@@ -91,7 +91,7 @@ export default function CloverCard() {
             style={{ background: '#00A650', color: '#fff' }}>
             Connect Clover <ArrowRight className="w-4 h-4" />
           </a>
-          <p className="text-[10px] mt-3" style={{ color: '#71717A' }}>You&apos;ll be redirected to Clover to authorize COLORgenius.</p>
+          <p className="text-[10px] mt-3" style={{ color: '#71717A' }}>You&apos;ll be redirected to Clover to authorize COLORiq.</p>
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-# Phorest Integration for COLORgenius
+# Phorest Integration for COLORiq
 
 ## Overview
 Full Phorest salon software integration supporting client sync, appointment tracking, inventory management, and multi-branch support.
@@ -11,7 +11,7 @@ Full Phorest salon software integration supporting client sync, appointment trac
 | `phorest-auth.ts` | Authentication module (Basic Auth) |
 | `phorest-client.ts` | API client with rate limiting (95 RPS) and retry logic |
 | `phorest-sync.ts` | Full sync orchestrator with job tracking |
-| `phorest-inventory.ts` | Inventory pull and COLORgenius product mapping |
+| `phorest-inventory.ts` | Inventory pull and COLORiq product mapping |
 | `phorest-appointments.ts` | Appointment sync with visit tracking |
 | `index.ts` | Clean exports for all modules |
 | `README.md` | This file |
@@ -44,7 +44,7 @@ Full Phorest salon software integration supporting client sync, appointment trac
 
 ## Data Mapping
 
-| Phorest Entity | COLORgenius Table | Notes |
+| Phorest Entity | COLORiq Table | Notes |
 |---------------|-------------------|-------|
 | Client | `clients` | Matched by email/phone, upserted |
 | Appointment | `client_visits` | Creates visit records with services |

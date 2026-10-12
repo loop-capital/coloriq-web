@@ -1,4 +1,4 @@
-// LocalStorage wrapper for ColorGenius dashboard
+// LocalStorage wrapper for ColorIq dashboard
 // No database needed for MVP — persists to localStorage
 
 import { AnalysisResult } from './color-analysis';

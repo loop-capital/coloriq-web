@@ -32,7 +32,7 @@ const publishSchema = z.object({
 
 /**
  * Score a formula based on analysis criteria
- * In production, this would call the COLORgenius algorithm
+ * In production, this would call the COLORiq algorithm
  */
 function scoreFormula(data: z.infer<typeof publishSchema>): number {
   let score = 50; // Base score
@@ -176,7 +176,7 @@ export async function GET() {
         { tier: 'professional', monthly_uses: '10–49', per_use: `$${(TIER_PER_USE_CENTS.professional / 100).toFixed(2)}/use`, description: 'Proven catalog, repeat salon demand' },
         { tier: 'master', monthly_uses: '50–149', per_use: `$${(TIER_PER_USE_CENTS.master / 100).toFixed(2)}/use`, description: 'Consistently used across your catalog' },
         { tier: 'signature', monthly_uses: '150–499', per_use: `$${(TIER_PER_USE_CENTS.signature / 100).toFixed(2)}/use`, description: 'Top-tier, widely used creator' },
-        { tier: 'elite', monthly_uses: '500+', per_use: `$${(TIER_PER_USE_CENTS.elite / 100).toFixed(2)}/use`, description: 'The most-used creators on COLORgenius' },
+        { tier: 'elite', monthly_uses: '500+', per_use: `$${(TIER_PER_USE_CENTS.elite / 100).toFixed(2)}/use`, description: 'The most-used creators on COLORiq' },
       ],
       pricing_note: 'Your tier is earned by your trailing-12-month monthly average of licensed formula uses across ALL of your published formulas — ranked by sales, never likes. Free Community uses count toward your ranking; your own uses and refunded uses do not. Signature/Elite require 90+ days since your first listing. Recalculated on the 1st of each month; upgrades apply immediately, demotions require 2 consecutive months below threshold.',
       revenue_split: { creator: '70%', platform: '30%' },

@@ -6,7 +6,7 @@ interface LogoIconProps {
   color?: string;
 }
 
-export const ColorGeniusLogo: React.FC<LogoIconProps> = ({ 
+export const ColorIqLogo: React.FC<LogoIconProps> = ({ 
   className = '', 
   size = 32, 
   color = '#9333EA' 
@@ -28,4 +28,4 @@ export const ColorGeniusLogo: React.FC<LogoIconProps> = ({
   </div>
 );
 
-export default ColorGeniusLogo;
+export default ColorIqLogo;

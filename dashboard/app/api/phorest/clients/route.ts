@@ -1,6 +1,6 @@
 /**
  * GET /api/phorest/clients
- * Search clients in Phorest and sync to COLORgenius
+ * Search clients in Phorest and sync to COLORiq
  *
  * POST /api/phorest/clients
  * Sync specific clients or all clients from Phorest

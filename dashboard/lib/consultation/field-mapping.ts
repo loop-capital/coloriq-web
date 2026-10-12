@@ -463,7 +463,7 @@ function buildFieldSummary(): string {
   }).join('\n');
 }
 
-export const DICTATION_SYSTEM_PROMPT = `You are a hair-color consultation field mapper for the COLORgenius pro salon app.
+export const DICTATION_SYSTEM_PROMPT = `You are a hair-color consultation field mapper for the COLORiq pro salon app.
 A stylist dictates consultation notes by voice; a browser speech-to-text engine produced the transcript below.
 Map each concrete, explicit statement to the matching consultation field. Output JSON only.
 

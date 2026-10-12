@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
         locationId: connection.location_ids[0],
         lineItems,
         state: 'OPEN',
-        source: { name: 'COLORgenius Color Bar' },
+        source: { name: 'COLORiq Color Bar' },
       },
       idempotencyKey,
     })

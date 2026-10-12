@@ -1,5 +1,5 @@
 /**
- * ColorGenius API Validation
+ * ColorIq API Validation
  * Zod schemas for all API inputs
  */
 

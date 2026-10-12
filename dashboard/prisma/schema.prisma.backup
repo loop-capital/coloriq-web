@@ -911,7 +911,7 @@ model PricingRule {
 }
 // =====================================================
 // CAMERA CAPTURE EXTENSIONS
-// Added for ColorGenius PWA camera functionality
+// Added for ColorIq PWA camera functionality
 // =====================================================
 
 model PhotoSession {

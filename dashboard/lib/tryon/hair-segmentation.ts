@@ -1,5 +1,5 @@
 /**
- * ColorGenius Hair Segmentation Engine
+ * ColorIq Hair Segmentation Engine
  * 
  * Multiple segmentation strategies for hair detection and masking.
  * Generates hair region masks for accurate color application.

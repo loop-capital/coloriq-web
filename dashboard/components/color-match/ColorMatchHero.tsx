@@ -136,7 +136,7 @@ export function ColorMatchHero() {
               Find Your Color Match
             </h2>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18, maxWidth: 520, margin: '0 auto' }}>
-              Upload any hair inspiration photo and get an instant COLORgenius formula match
+              Upload any hair inspiration photo and get an instant COLORiq formula match
             </p>
           </motion.div>
         </div>

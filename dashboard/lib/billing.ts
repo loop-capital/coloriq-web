@@ -150,7 +150,7 @@ export async function billSalonForPeriod(
       sourceId: salon.square_card_id,
       customerId: salon.square_customer_id || undefined,
       amountCents: combinedTotalCents,
-      note: `ColorGenius formula licenses — ${period}`,
+      note: `ColorIq formula licenses — ${period}`,
     });
 
     const updated = await prisma.formula_billing_invoices.update({

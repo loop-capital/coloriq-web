@@ -1,5 +1,5 @@
 """
-ColorGenius Brand & Shade Verifier
+ColorIq Brand & Shade Verifier
 Cross-references manufacturer websites against our data files.
 """
 import asyncio
@@ -55,7 +55,7 @@ def load_our_shades(brand):
 
 async def main():
     print("=" * 60)
-    print("ColorGenius Brand & Shade Verification")
+    print("ColorIq Brand & Shade Verification")
     print("=" * 60)
 
     total_ours = 0

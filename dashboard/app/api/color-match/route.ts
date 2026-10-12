@@ -6,7 +6,7 @@ import { ALL_PRODUCTS } from '@/lib/products';
  * POST /api/color-match
  * 
  * Accepts a multipart/form-data image upload, runs AI vision analysis,
- * maps the extracted color to the nearest COLORgenius formula, and returns
+ * maps the extracted color to the nearest COLORiq formula, and returns
  * a match result with confidence score.
  * 
  * Form fields:

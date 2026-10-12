@@ -5,7 +5,7 @@ if (!process.env.JWT_SECRET) {
   console.warn('[auth] JWT_SECRET env var is not set — using insecure fallback. Set JWT_SECRET in production.');
 }
 export const JWT_SECRET_KEY = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'colorgenius-prod-secret-2026'
+  process.env.JWT_SECRET || 'coloriq-prod-secret-2026'
 );
 const COOKIE_NAME = 'colorgenius_token';
 

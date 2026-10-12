@@ -2,7 +2,7 @@
  * Phorest Appointment Integration
  *
  * Pulls appointment data from Phorest for client tracking and service history.
- * Maps Phorest appointments to COLORgenius visit tracking.
+ * Maps Phorest appointments to COLORiq visit tracking.
  *
  * @see https://developer.phorest.com/reference/getappointments.md
  */
@@ -54,7 +54,7 @@ export interface AppointmentSyncOptions {
 }
 
 /**
- * Sync appointments from Phorest to COLORgenius client_visits
+ * Sync appointments from Phorest to COLORiq client_visits
  */
 export async function syncPhorestAppointments(
   options: AppointmentSyncOptions
@@ -294,7 +294,7 @@ export async function syncPhorestServiceHistories(
             continue;
           }
 
-          // Find COLORgenius client
+          // Find COLORiq client
           const cgClient = await prisma.clients.findFirst({
             where: {
               salon_id: salonId,
@@ -303,7 +303,7 @@ export async function syncPhorestServiceHistories(
           });
 
           if (!cgClient) {
-            result.errors.push({ itemId: phClientId, error: 'Client not found in COLORgenius' });
+            result.errors.push({ itemId: phClientId, error: 'Client not found in COLORiq' });
             continue;
           }
 
@@ -361,7 +361,7 @@ export async function syncPhorestServiceHistories(
               continue;
             }
 
-            // Find COLORgenius client
+            // Find COLORiq client
             const cgClient = await prisma.clients.findFirst({
               where: {
                 salon_id: salonId,

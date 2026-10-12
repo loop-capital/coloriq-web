@@ -1,5 +1,5 @@
 /**
- * Share Code Generator for ColorGenius Formulas
+ * Share Code Generator for ColorIq Formulas
  * Generates deterministic short codes like "CG-E14A" from formula IDs
  */
 
@@ -45,7 +45,7 @@ export function generateShareCode(formulaId: string): string {
  * Generate a full share URL
  */
 export function getShareUrl(shareCode: string): string {
-  return `https://colorgenius.co/f/${shareCode}`;
+  return `https://getCOLORiq.co/f/${shareCode}`;
 }
 
 /**

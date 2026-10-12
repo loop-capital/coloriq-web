@@ -69,7 +69,7 @@ function validate(): void {
   }
 
   // ── Report ──────────────────────────────────────────────────────────────────
-  console.log('=== ColorGenius Brand Data Validation ===\n');
+  console.log('=== ColorIq Brand Data Validation ===\n');
   console.log('Brand Coverage:');
 
   const brandList = Object.entries(brandStats).sort((a, b) => b[1].count - a[1].count);

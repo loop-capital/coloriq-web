@@ -1,7 +1,7 @@
 /**
  * Phorest Data Synchronization Engine
  *
- * Orchestrates full and incremental syncs between Phorest and COLORgenius.
+ * Orchestrates full and incremental syncs between Phorest and COLORiq.
  * Supports:
  * - Full sync (all entities)
  * - Incremental sync (updated_since)
@@ -85,7 +85,7 @@ export interface FullSyncOptions {
 }
 
 /**
- * Perform a full sync of Phorest data into COLORgenius.
+ * Perform a full sync of Phorest data into COLORiq.
  * This is the main entry point for syncing everything.
  */
 export async function performFullSync(options: FullSyncOptions): Promise<PhorestFullSyncResult> {

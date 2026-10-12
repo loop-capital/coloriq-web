@@ -94,7 +94,7 @@ function RegisterContent() {
         {step === 1 ? (
           <>
             <h1 className="text-2xl font-bold text-white text-center mb-1">Create Your Account</h1>
-            <p className="text-sm text-center mb-8" style={{ color: '#71717A' }}>Join the ColorGenius professional community</p>
+            <p className="text-sm text-center mb-8" style={{ color: '#71717A' }}>Join the ColorIq professional community</p>
 
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
@@ -118,7 +118,7 @@ function RegisterContent() {
                   {handleAvailable === true && <Check className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#10B981]" />}
                   {handleAvailable === false && <X className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#EF4444]" />}
                 </div>
-                <p className="text-[10px] mt-1" style={{ color: '#71717A' }}>This is your public profile URL: colorgenius.co/@handle</p>
+                <p className="text-[10px] mt-1" style={{ color: '#71717A' }}>This is your public profile URL: getCOLORiq.co/@handle</p>
               </div>
 
               <div>

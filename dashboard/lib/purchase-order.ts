@@ -43,11 +43,11 @@ export function generatePurchaseOrderPDF(data: PurchaseOrderData): Uint8Array {
   doc.setFillColor(...PALETTE.headerBg)
   doc.rect(0, 0, pageW, 100, 'F')
 
-  // ColorGenius logo text
+  // ColorIq logo text
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(24)
   doc.setTextColor(...PALETTE.accent)
-  doc.text('ColorGenius', margin, 55)
+  doc.text('ColorIq', margin, 55)
 
   // PO label
   doc.setFontSize(11)
@@ -141,7 +141,7 @@ export function generatePurchaseOrderPDF(data: PurchaseOrderData): Uint8Array {
       doc.setFontSize(8)
       doc.setTextColor(...PALETTE.textMuted)
       doc.text(
-        `ColorGenius Auto-Order  •  Page ${dataArg.pageNumber} of ${(doc as any).internal.getNumberOfPages()}`,
+        `ColorIq Auto-Order  •  Page ${dataArg.pageNumber} of ${(doc as any).internal.getNumberOfPages()}`,
         margin,
         pageH - 20
       )

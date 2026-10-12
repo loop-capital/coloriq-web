@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     for (const conn of connections) {
       try {
         // Call the sync endpoint internally
-        const syncRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://colorgenius.co'}/api/square/clients/sync`, {
+        const syncRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://getCOLORiq.co'}/api/square/clients/sync`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ salon_id: conn.salon_id }),

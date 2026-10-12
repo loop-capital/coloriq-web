@@ -13,7 +13,7 @@ async function getAuthUser(request: Request) {
   return { id: authUser.userId, email: authUser.email, salon_id: salon_id || undefined };
 }
 
-// Map Square customer to COLORgenius client schema
+// Map Square customer to COLORiq client schema
 function mapSquareCustomer(customer: any, salonId: string) {
   // Square SDK v44 customer fields are camelCase (givenName, emailAddress, ...),
   // not the snake_case this previously assumed — every synced client was

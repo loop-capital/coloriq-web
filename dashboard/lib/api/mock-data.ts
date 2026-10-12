@@ -1,5 +1,5 @@
 /**
- * ColorGenius API Mock Data
+ * ColorIq API Mock Data
  * In-memory storage for community, marketplace, and gallery endpoints
  */
 

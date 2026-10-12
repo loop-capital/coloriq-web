@@ -1,5 +1,5 @@
 /**
- * ColorGenius — Camera Capture Types
+ * ColorIq — Camera Capture Types
  */
 
 export type CameraFacing = 'user' | 'environment';

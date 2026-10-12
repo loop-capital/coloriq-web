@@ -1,11 +1,11 @@
 /**
- * ColorGenius — Service Worker for PWA offline support
+ * ColorIq — Service Worker for PWA offline support
  * Supports: static caching, API response caching, offline data entry
  */
 
-const CACHE_NAME = 'colorgenius-v2';
-const API_CACHE = 'colorgenius-api-v1';
-const OFFLINE_QUEUE = 'colorgenius-offline-queue';
+const CACHE_NAME = 'coloriq-v2';
+const API_CACHE = 'coloriq-api-v1';
+const OFFLINE_QUEUE = 'coloriq-offline-queue';
 
 const STATIC_ASSETS = [
   '/',
@@ -156,7 +156,7 @@ async function processOfflineQueue() {
 // Simple IndexedDB helper
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('colorgenius-offline', 1);
+    const request = indexedDB.open('coloriq-offline', 1);
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(OFFLINE_QUEUE)) {

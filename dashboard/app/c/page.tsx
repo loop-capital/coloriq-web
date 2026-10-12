@@ -169,7 +169,7 @@ export default function MobileUploadPage() {
             textTransform: 'uppercase',
           }}
         >
-          ColorGenius
+          ColorIq
         </div>
       </div>
 

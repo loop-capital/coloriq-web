@@ -1,5 +1,5 @@
 /**
- * ColorGenius AR Try-On Shade Library
+ * ColorIq AR Try-On Shade Library
  * 
  * Comprehensive shade database for virtual hair color rendering.
  * Each shade includes RGB, HSL, and rendering metadata for

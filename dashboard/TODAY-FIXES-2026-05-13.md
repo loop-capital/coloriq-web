@@ -1,4 +1,4 @@
-# ColorGenius — Today's Fixes (2026-05-13)
+# ColorIq — Today's Fixes (2026-05-13)
 
 > **Date:** 2026-05-13
 > **Status:** In Progress (Vercel deploy limit resets 8 PM ET)
@@ -16,7 +16,7 @@
 | 5 | Pricing Rules | Title font size `text-2xl` → `text-3xl` | ✅ Deployed |
 | 6 | Inventory | Title font size `text-2xl` → `text-3xl` | ✅ Deployed |
 
-**Deploy URL:** https://colorgenius.co
+**Deploy URL:** https://getCOLORiq.co
 **Vercel limit:** Hit — resets ~8 PM ET
 
 ---

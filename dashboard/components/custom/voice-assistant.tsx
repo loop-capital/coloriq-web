@@ -267,7 +267,7 @@ export function VoiceAssistant({ clientId, context, position = 'bottom-right' }:
           <p className="text-xs text-[#71717A]">
             {voiceDisabledMidUse
               ? 'This salon’s voice assistant was turned off.'
-              : 'Ask ColorGenius to turn this on for your salon — it’s billed per question.'}
+              : 'Ask ColorIq to turn this on for your salon — it’s billed per question.'}
           </p>
         </div>
       )}
@@ -284,7 +284,7 @@ export function VoiceAssistant({ clientId, context, position = 'bottom-right' }:
           )}
           {response && (
             <div>
-              <p className="text-[11px] text-[#9333EA] mb-0.5">ColorGenius:</p>
+              <p className="text-[11px] text-[#9333EA] mb-0.5">ColorIq:</p>
               <p className="text-sm text-[#F5F5F7] leading-relaxed">{response}</p>
               {billing && (
                 <p className="text-[10px] text-[#71717A] mt-2">

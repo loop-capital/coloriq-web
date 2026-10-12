@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'colorgenius-prod-secret-2026'
+  process.env.JWT_SECRET || 'coloriq-prod-secret-2026'
 );
 
 const PUBLIC_PATHS = [

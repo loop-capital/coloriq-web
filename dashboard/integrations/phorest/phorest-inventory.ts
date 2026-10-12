@@ -1,7 +1,7 @@
 /**
  * Phorest Inventory Integration
  *
- * Pulls products from Phorest and maps them to COLORgenius inventory_items format.
+ * Pulls products from Phorest and maps them to COLORiq inventory_items format.
  * Handles:
  * - Product categorization (color, developer, treatment, retail)
  * - Stock level tracking
@@ -47,7 +47,7 @@ const CATEGORY_MAPPINGS: CategoryMapping[] = [
 ];
 
 /**
- * Map a Phorest product type string or name to a COLORgenius category
+ * Map a Phorest product type string or name to a COLORiq category
  */
 export function mapProductCategory(product: PhorestProduct): ProductCategory {
   const searchText = `${product.type || ''} ${product.categoryName || ''} ${product.name || ''}`.toLowerCase();
@@ -143,7 +143,7 @@ export interface InventorySyncOptions {
 }
 
 /**
- * Sync products from Phorest to COLORgenius inventory_items
+ * Sync products from Phorest to COLORiq inventory_items
  */
 export async function syncPhorestInventory(
   options: InventorySyncOptions

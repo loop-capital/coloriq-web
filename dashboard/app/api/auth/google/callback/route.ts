@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     // Exchange code for tokens
     const clientId = process.env.GOOGLE_CLIENT_ID!;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || 'https://colorgenius.co/api/auth/google/callback';
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || 'https://getCOLORiq.co/api/auth/google/callback';
 
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',

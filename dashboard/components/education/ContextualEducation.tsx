@@ -17,7 +17,7 @@ interface ContextualEducationProps {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Styles (inline, matching COLORgenius dark theme)                   */
+/*  Styles (inline, matching COLORiq dark theme)                   */
 /* ------------------------------------------------------------------ */
 
 const sectionCard = {

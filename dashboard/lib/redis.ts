@@ -1,5 +1,5 @@
 /**
- * Redis Helper — ColorGenius
+ * Redis Helper — ColorIq
  * 
  * Production: Set REDIS_URL env var to your Redis connection string.
  * Development: Falls back to in-memory cache (no Redis required locally).

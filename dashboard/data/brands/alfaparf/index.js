@@ -1,4 +1,4 @@
-// Alfaparf Milano brand exports for ColorGenius
+// Alfaparf Milano brand exports for ColorIq
 // Line: Evolution of the Color (Permanent)
 
 const evolutionShades = require('./evolution-shades.json');

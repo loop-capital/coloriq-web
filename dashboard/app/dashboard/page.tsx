@@ -7,7 +7,7 @@ import {
   FlaskConical, Users, Camera, BookOpen, History, ArrowRight,
   TrendingUp, UserPlus, Sparkles, CirclePlus, Package, DollarSign,
 } from 'lucide-react';
-import { ColorGeniusLogo } from '@/components/icons/colorgenius-logo';
+import { ColorIqLogo } from '@/components/icons/coloriq-logo';
 
 const quickActions = [
   { label: 'New Service', href: '/service', icon: CirclePlus, color: '#10B981' },
@@ -55,7 +55,7 @@ export default function DashboardPage() {
           className="mb-8"
         >
           <h1 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--cg-text-primary)' }}>
-            Welcome back to <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">ColorGenius</span>
+            Welcome back to <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">ColorIq</span>
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--cg-text-secondary)' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}

@@ -1,6 +1,6 @@
 /**
  * POST /api/square/sync
- * Sync a salon's Square product catalog into COLORgenius inventory_items table
+ * Sync a salon's Square product catalog into COLORiq inventory_items table
  *
  * Pulls all catalog items from the salon's Square account
  * and upserts them into inventory_items with source="square"
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     const connection = await getConnection(salonId);
 
     // Note: we intentionally don't pull Square's inventory counts here.
-    // Square tracks whole retail units (bottles/tubes); ColorGenius tracks
+    // Square tracks whole retail units (bottles/tubes); ColorIq tracks
     // grams consumed via formula usage and the scale-bowl feature. Those are
     // different, non-convertible units — writing Square's count into
     // quantity_on_hand previously corrupted it (e.g. "12" bottles read as

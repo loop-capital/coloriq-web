@@ -3,7 +3,7 @@
  * Admin-only — enable or disable the bowl-side voice assistant for one
  * salon. Deliberately admin-gated, not self-service: it's a per-minute
  * billed feature (real OpenAI cost per question), and a salon opts in by
- * asking ColorGenius, not by flipping a switch in their own Settings.
+ * asking ColorIq, not by flipping a switch in their own Settings.
  */
 
 import { NextRequest, NextResponse } from 'next/server';

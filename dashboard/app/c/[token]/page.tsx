@@ -310,7 +310,7 @@ export default function ClientPortalPage() {
             <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #9333EA, #EC4899)' }}>
               <Sparkles size={12} color="#0A0A0F" />
             </div>
-            <span className="text-xs font-bold text-white/40">ColorGenius</span>
+            <span className="text-xs font-bold text-white/40">ColorIq</span>
           </div>
           <p className="text-[10px] text-white/15">Powered by AI color science</p>
           <button

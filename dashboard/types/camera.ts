@@ -1,5 +1,5 @@
 /**
- * ColorGenius — Camera Capture Types
+ * ColorIq — Camera Capture Types
  *
  * Shared TypeScript types for the PWA camera workflow.
  * Aligned with Prisma schema enums and dashboard/lib/camera-types.ts
