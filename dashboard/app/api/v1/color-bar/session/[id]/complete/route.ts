@@ -165,6 +165,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     // ── Inventory + StockTransaction audit per used item ─────────────────
+    // Idempotency: skip if this session was already deducted (prevents double-count
+    // when both color-bar completion and visit completion fire for the same session)
+    const existingDeductions = await prisma.inventory_transactions.findFirst({
+      where: {
+        reference_type: 'color_bar_session',
+        reference_id: id,
+        transaction_type: 'usage',
+      },
+      select: { id: true },
+    })
+    const alreadyDeducted = !!existingDeductions
+
     const stockUpdates: {
       brand: string
       shadeCode: string
@@ -175,6 +187,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }[] = []
 
     for (const step of steps) {
+      if (alreadyDeducted) continue
       if (!step.brand || !step.shadeCode) continue
 
       const gramsUsed = Math.max(step.actualGrams || step.targetGrams || 0, 0)

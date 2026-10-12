@@ -209,11 +209,9 @@ export async function autoDeductFormulation(
     }> = [];
 
     for (const component of components) {
-      // Skip developer components — they are tracked differently
-      if (component.component_type === "developer") {
-        continue;
-      }
-
+      // Developer is a real cost (20-40% of product volume) -- deduct it like
+      // other components. Developer inventory items are matched by brand + volume
+      // label (e.g. "20 Vol") stored as shade_code.
       const brand = component.brand;
       const shadeCode = component.shade_code;
 
