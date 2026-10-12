@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import {
   FlaskConical, Users, Camera, BookOpen, History, ArrowRight,
   TrendingUp, UserPlus, Sparkles, CirclePlus, Package, DollarSign,
+  HeartPulse,
 } from 'lucide-react';
 import { ColorIqLogo } from '@/components/icons/coloriq-logo';
 
@@ -16,6 +17,7 @@ const quickActions = [
   { label: 'Pricing', href: '/dashboard/pricing', icon: DollarSign, color: '#8B5CF6' },
   { label: 'New Consultation', href: '/questionnaire', icon: UserPlus, color: '#9333EA' },
   { label: 'Analyze Hair', href: '/analyze', icon: Camera, color: '#9333EA' },
+  { label: 'Correction Triage', href: '/dashboard/triage', icon: HeartPulse, color: '#EF4444' },
 ];
 
 const containerVariants = {

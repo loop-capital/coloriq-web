@@ -28,7 +28,7 @@ export async function GET(
     // Also surface legacy JSON allergies from the clients record
     const client = await prisma.clients.findUnique({
       where: { id },
-      select: { allergies: true },
+      select: { allergies_legacy: true },
     });
     const legacy = (client?.allergies_legacy as any) || {};
     const legacyFlags: string[] = [];

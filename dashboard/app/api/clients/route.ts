@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         general_notes: body.notes?.trim() || null,
         // Persist questionnaire hair data when provided (questionnaire sends hairProfile/allergies)
         ...(body.hairProfile ? { hair_profile: body.hairProfile } : {}),
-        ...(body.allergies ? { allergies: body.allergies } : {}),
+        ...(body.allergies ? { allergies_legacy: body.allergies } : {}),
       },
     });
 
