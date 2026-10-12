@@ -558,7 +558,7 @@ export default function FormulatePage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ fontSize: 12, color: '#71717A' }}>Phone upload code:</span>
                       <span style={{ fontSize: 18, fontWeight: 700, letterSpacing: 4, color: '#9333EA', fontFamily: 'monospace' }}>{sessionCode}</span>
-                      <span style={{ fontSize: 11, color: '#71717A' }}>→ getCOLORiq.co/c</span>
+                      <span style={{ fontSize: 11, color: '#71717A' }}>→ coloriq.co/c</span>
                     </div>
                   ) : (
                     <button type="button" onClick={generateSessionCode} style={{ fontSize: 12, color: '#9333EA', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>

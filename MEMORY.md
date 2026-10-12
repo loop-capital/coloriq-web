@@ -426,4 +426,9 @@ Remaining: Analyze, Library, History, Questionnaire
 
 ---
 
+## Recent Research
+- 2026-10-08: Research (categories 5, 6, competitor intel), 5 findings, see research/findings-2026-10-08.md
+
+---
+
 _This file was last rebuilt on 2026-09-16. Keep it updated after every major milestone._

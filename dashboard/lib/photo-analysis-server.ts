@@ -445,7 +445,7 @@ function kMeans(
 // ─── Vision Analysis (GPT-4o-mini) ───────────────────────────────────────────
 // Was Kimi K2.6 via a local Ollama instance, with GPT-4o-mini as fallback.
 // Dropped Kimi entirely: both the web app and the iOS app (mobile/src/api/
-// client.ts, API_BASE = getCOLORiq.co) run through this same Vercel-deployed
+// client.ts, API_BASE = coloriq.co) run through this same Vercel-deployed
 // backend, which can never reach a local Ollama server (127.0.0.1) — so that
 // path could never succeed for any real user, only in local dev on the one
 // machine running Ollama. Not worth maintaining two providers for that.

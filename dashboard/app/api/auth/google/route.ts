@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   const clientId = process.env.GOOGLE_CLIENT_ID!;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI || 'https://getCOLORiq.co/api/auth/google/callback';
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI || 'https://coloriq.co/api/auth/google/callback';
   const state = crypto.randomUUID();
 
   const params = new URLSearchParams({

@@ -16,7 +16,7 @@
 | 5 | Pricing Rules | Title font size `text-2xl` → `text-3xl` | ✅ Deployed |
 | 6 | Inventory | Title font size `text-2xl` → `text-3xl` | ✅ Deployed |
 
-**Deploy URL:** https://getCOLORiq.co
+**Deploy URL:** https://coloriq.co
 **Vercel limit:** Hit — resets ~8 PM ET
 
 ---

@@ -118,7 +118,7 @@ function RegisterContent() {
                   {handleAvailable === true && <Check className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#10B981]" />}
                   {handleAvailable === false && <X className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#EF4444]" />}
                 </div>
-                <p className="text-[10px] mt-1" style={{ color: '#71717A' }}>This is your public profile URL: getCOLORiq.co/@handle</p>
+                <p className="text-[10px] mt-1" style={{ color: '#71717A' }}>This is your public profile URL: coloriq.co/@handle</p>
               </div>
 
               <div>

@@ -24,7 +24,7 @@ ALTER TABLE "stylists" ADD CONSTRAINT "stylists_user_id_fkey"
   FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 CREATE UNIQUE INDEX "stylists_user_id_key" ON "stylists"("user_id");
 
--- 3. stylists.handle — the public @handle (getCOLORiq.co/@handle) collected at
+-- 3. stylists.handle — the public @handle (coloriq.co/@handle) collected at
 --    registration and validated there, but never persisted anywhere (no column existed
 --    on either users or stylists). Every new signup silently lost it.
 ALTER TABLE "stylists" ADD COLUMN "handle" VARCHAR(30);
