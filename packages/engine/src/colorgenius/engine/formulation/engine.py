@@ -266,11 +266,20 @@ class FormulationEngine:
                         )
                     )
 
-            # Adjust for gray coverage per book's ratio rules (Ch 8):
-            # 30-75% grey -> 75% N + 25% tone, 75%+ grey -> 80% N + 20% tone
+            # Adjust for gray coverage per validated ratios:
+            # 30-50% grey -> 50% N + 50% tone (aligns w/ professional consensus)
+            # 50-75% grey -> 75% N + 25% tone (Formulate Ch.8)
+            # 75%+ grey -> 80% N + 20% tone (Formulate Ch.8, master technique)
+            # Note: 80/20 exceeds manufacturer 50% cap -- intentional per
+            # Formulate Ch.8. Requires exact level match on natural shade.
             gray_pct = input_data.client.gray_percentage
             if gray_pct > 30:
-                natural_ratio = 0.80 if gray_pct >= 75 else 0.75
+                if gray_pct >= 75:
+                    natural_ratio = 0.80
+                elif gray_pct >= 50:
+                    natural_ratio = 0.75
+                else:
+                    natural_ratio = 0.50
                 current_total = sum(c.amount_oz for c in components)
                 natural_amt = round(natural_ratio * current_total / (1 - natural_ratio), 2)
                 natural = self.db.find_natural_shade(
