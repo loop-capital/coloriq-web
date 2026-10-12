@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: loop-capital/colorgenius-web
+          repository: loop-capital/coloriq-web
           token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Setup Node.js
