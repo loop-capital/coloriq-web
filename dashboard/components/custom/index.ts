@@ -32,3 +32,7 @@ export {
   type PhotoDetailProps,
   type PhotoDetail as PhotoDetailType,
 } from './photo-detail'
+export { AllergyAlert } from './allergy-alert'
+export { PatchTestSection } from './patch-test-section'
+export { AllergySection } from './allergy-section'
+export { AccuracyPrompt } from './accuracy-prompt'

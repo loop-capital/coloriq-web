@@ -26,6 +26,9 @@ import {
   DollarSign,
   Star,
 } from 'lucide-react'
+import { PatchTestSection } from '@/components/custom/patch-test-section'
+import { AllergySection } from '@/components/custom/allergy-section'
+import { AllergyAlert } from '@/components/custom/allergy-alert'
 
 interface Client {
   id: string
@@ -105,6 +108,29 @@ export default function ClientDetailPage() {
     loadClient()
   }, [clientId])
 
+  const [safetyFlags, setSafetyFlags] = useState<{ allergies: any[]; legacyFlags: string[] }>({ allergies: [], legacyFlags: [] })
+
+  const loadSafety = async (id: string) => {
+    try {
+      const [aRes, pRes] = await Promise.all([
+        fetch(`/api/v1/clients/${id}/allergies`),
+        fetch(`/api/v1/clients/${id}/patch-tests`),
+      ])
+      const aData = aRes.ok ? await aRes.json() : { allergies: [], legacyFlags: [] }
+      const pData = pRes.ok ? await pRes.json() : { status: 'never_tested' }
+      const failedTest = pData.status === 'failed'
+      setSafetyFlags({
+        allergies: [
+          ...(aData.allergies || []),
+          ...(failedTest ? [{ allergen: 'Failed patch test - do not apply oxidative color', severity: 'severe' }] : []),
+        ],
+        legacyFlags: aData.legacyFlags || [],
+      })
+    } catch {
+      // safety data is best-effort; never block the client page
+    }
+  }
+
   const loadClient = async () => {
     setLoading(true)
     try {
@@ -113,6 +139,8 @@ export default function ClientDetailPage() {
       if (!res.ok) throw new Error('Failed to load client')
       const data = await res.json()
       setClient(data.client || null)
+
+      loadSafety(clientId)
 
       // Fetch formulas for this client
       const formulaRes = await fetch(`/api/formulas?clientId=${clientId}`)
@@ -289,10 +317,18 @@ export default function ClientDetailPage() {
               </p>
             </CardContent>
           </Card>
+
+          <div className="mt-4 space-y-4">
+            <PatchTestSection clientId={clientId} />
+            <AllergySection clientId={clientId} />
+          </div>
         </div>
 
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-4">
+          {(safetyFlags.allergies.length > 0 || safetyFlags.legacyFlags.length > 0) && (
+            <AllergyAlert allergies={safetyFlags.allergies} legacyFlags={safetyFlags.legacyFlags} />
+          )}
           {/* Formulation History */}
           <Card className="card-glass">
             <CardHeader className="flex flex-row items-center justify-between pb-2">

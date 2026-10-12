@@ -82,7 +82,7 @@ model clients {
   primary_stylist_id  String?                  @db.Uuid
   salon_id            String?                  @db.Uuid
   hair_profile        Json?                    @default("{\"density\": null, \"texture\": null, \"porosity\": \"normal\", \"natural_tone\": null, \"natural_level\": null, \"scalp_condition\": \"normal\"}")
-  allergies           Json?                    @default("{\"ppd\": false, \"other\": [], \"ammonia\": false, \"fragrance\": false}")
+  allergies_legacy           Json?                    @default("{\"ppd\": false, \"other\": [], \"ammonia\": false, \"fragrance\": false}")
   medications         String[]
   conditions          String[]
   preferences         Json?                    @default("{\"budget_range\": null, \"disliked_tones\": [], \"preferred_brands\": [], \"maintenance_level\": \"medium\", \"reminders_enabled\": true, \"communication_method\": \"text\"}")
@@ -113,6 +113,8 @@ model clients {
   photo_analyses      photo_analyses[]
   stylist_feedback    stylist_feedback[]
   visits              visits[]
+  patch_tests         client_patch_tests[]
+  allergy_records     client_allergies[]
 
   @@index([last_visit_at], map: "idx_clients_last_visit")
   @@index([salon_id], map: "idx_clients_salon")
@@ -1630,4 +1632,86 @@ model transformations {
   @@index([status], map: "idx_transformations_status")
   @@index([source_formula_id], map: "idx_transformations_source_formula")
   @@index([formulation_id], map: "idx_transformations_formulation")
+}
+
+/// Client patch test records — safety/compliance tracking for color services.
+/// A current (non-expired) passing test is required before applying oxidative color.
+model client_patch_tests {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  client_id     String    @db.Uuid
+  salon_id      String?   @db.Uuid
+  test_date     DateTime  @db.Date
+  product_brand String?   @db.VarChar(100)
+  product_shade String?   @db.VarChar(50)
+  result        String    @db.VarChar(20)
+  notes         String?
+  tested_by     String?   @db.Uuid
+  expiry_date   DateTime? @db.Date
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  client        clients   @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([client_id], map: "idx_patch_tests_client")
+  @@index([client_id, test_date(sort: Desc)], map: "idx_patch_tests_client_date")
+}
+
+/// Client allergy records — flagged allergens trigger warnings on the client
+/// record and when creating formulas containing the allergen.
+model client_allergies {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  client_id   String    @db.Uuid
+  allergen    String    @db.VarChar(100)
+  severity    String    @db.VarChar(20)
+  notes       String?
+  recorded_by String?   @db.Uuid
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  client      clients   @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([client_id], map: "idx_client_allergies_client")
+}
+
+/// Formula accuracy tracking — how well AI/predicted formulas perform in the
+/// real world. Feeds marketing claims and the model-improvement flywheel.
+/// Records with accuracy below threshold are flagged for retraining review.
+model formula_accuracy {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  formulation_id   String?   @db.Uuid
+  formula_id       String?   @db.Uuid
+  client_id        String?   @db.Uuid
+  stylist_id       String?   @db.Uuid
+  salon_id         String?   @db.Uuid
+  service_type     String?   @db.VarChar(50)
+  predicted_level  Int?
+  actual_level     Int?
+  predicted_tone   String?   @db.VarChar(50)
+  actual_tone      String?   @db.VarChar(50)
+  outcome          String    @db.VarChar(20)
+  rating           Int?
+  adjustment_notes String?
+  needs_retraining Boolean?  @default(false)
+  created_at       DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([formulation_id], map: "idx_formula_accuracy_formulation")
+  @@index([salon_id], map: "idx_formula_accuracy_salon")
+  @@index([salon_id, created_at(sort: Desc)], map: "idx_formula_accuracy_salon_date")
+  @@index([service_type], map: "idx_formula_accuracy_service")
+}
+
+// COLORiq Emergency Triage — permanent liability record of every triage session
+model triage_sessions {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  salon_id      String?   @db.Uuid
+  stylist_id    String?   @db.Uuid
+  client_id     String?   @db.Uuid
+  client_name   String?   @db.VarChar(200)
+  risk_grade    String    @db.VarChar(20)
+  symptoms      String[]
+  triage_input  Json?
+  risk_triggers String[]
+  recovery_plan Json?
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([salon_id], map: "idx_triage_salon")
+  @@index([salon_id, created_at(sort: Desc)], map: "idx_triage_salon_date")
+  @@index([risk_grade], map: "idx_triage_grade")
+  @@index([client_id], map: "idx_triage_client")
 }

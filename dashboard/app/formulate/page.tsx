@@ -11,6 +11,7 @@ import { ColorCircle } from '@/components/ui/color-circle'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { ColorWheel3D } from '@/components/custom'
+import { AllergyAlert } from '@/components/custom/allergy-alert'
 import { ScaleWidget } from '@/components/scale-widget'
 import { EditFormula, type FormulaIngredient } from '@/components/edit-formula'
 import { ScaleBowl, type BowlIngredient } from '@/components/scale-bowl'
@@ -297,6 +298,36 @@ function FormulatePageContent() {
   const [checkingPhoto, setCheckingPhoto] = useState(false)
   const [salonId, setSalonId] = useState<string>('')
   const [clientId, setClientId] = useState<string | null>(null)
+  const [clientAllergies, setClientAllergies] = useState<Array<{ allergen: string; severity: string }>>([])
+  const [clientLegacyFlags, setClientLegacyFlags] = useState<string[]>([])
+
+  // Fetch allergy flags whenever the linked client changes — warn before formulating
+  useEffect(() => {
+    if (!clientId) {
+      setClientAllergies([])
+      setClientLegacyFlags([])
+      return
+    }
+    fetch(`/api/v1/clients/${clientId}/allergies`)
+      .then((r) => (r.ok ? r.json() : { allergies: [], legacyFlags: [] }))
+      .then((d) => {
+        setClientAllergies(d.allergies || [])
+        setClientLegacyFlags(d.legacyFlags || [])
+      })
+      .catch(() => {})
+    // Also check patch test status — a failed test blocks oxidative color
+    fetch(`/api/v1/clients/${clientId}/patch-tests`)
+      .then((r) => (r.ok ? r.json() : { status: 'never_tested' }))
+      .then((d) => {
+        if (d.status === 'failed') {
+          setClientAllergies((prev) => [
+            ...prev,
+            { allergen: 'Failed patch test — do not apply oxidative color', severity: 'severe' },
+          ])
+        }
+      })
+      .catch(() => {})
+  }, [clientId])
   const [clientName, setClientName] = useState('')
   const [clientPhone, setClientPhone] = useState('')
   const [clientSearch, setClientSearch] = useState('')
@@ -599,6 +630,13 @@ function FormulatePageContent() {
           </div>
           <button type="button" onClick={() => { setFd({ currentLevel: 5, currentTone: 'N', targetLevel: 7, targetTone: 'N', hairType: 'normal', texture: 'medium', hairPattern: 'straight', density: 'medium', serviceType: 'full_head', chemicalHistory: [], sensitivities: [], lastChemicalService: 'never', condition: { type: 'previously_colored', porosity: 'normal', grayPercent: 0, highlights: false, highlightedPercent: 0, banding: false, hotRoots: false, previousLightener: false, multipleColors: false, greenCast: false, muddyToner: false, overAshy: false, colorGrab: false, hollowEnds: false }, brandPreference: '', linePreference: '' }); setResult(null); setPhoto(null); setStep(1) }} style={btnOutline}><RotateCcw size={14} /> Reset</button>
         </div>
+
+        {/* Allergy / patch-test safety alert for linked client */}
+        {(clientAllergies.length > 0 || clientLegacyFlags.length > 0) && (
+          <div style={{ marginBottom: 16 }}>
+            <AllergyAlert allergies={clientAllergies} legacyFlags={clientLegacyFlags} />
+          </div>
+        )}
 
         {/* Voice Dictation */}
         <div style={{ ...card, marginBottom: 16, padding: '12px 20px' }}>
