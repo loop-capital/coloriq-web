@@ -416,14 +416,9 @@ class FormulationEngine:
         if input_data.client.gray_percentage > 50:
             base_time += 10
 
-        # Apply multipliers
+        # Apply multipliers (texture already included via processing_time_multiplier
+        # in _apply_adjustments -- do not double-count here)
         base_time *= formula.processing_time_multiplier
-
-        # Adjust for texture
-        if input_data.hair_profile.texture == "coarse":
-            base_time *= 1.1
-        elif input_data.hair_profile.texture == "fine":
-            base_time *= 0.95
 
         # Determine application sequence
         sequence = self._determine_application_sequence(
@@ -448,11 +443,11 @@ class FormulationEngine:
             return None
 
         # Determine toning shade based on exposed undertone
-        current_level = input_data.current.level
+        target_level = input_data.target.level  # Post-lift level: undertone is exposed at achieved level, not starting level
 
-        if current_level <= 5:
+        if target_level <= 5:
             toning_shade = "10A"  # Ash to neutralize orange
-        elif current_level <= 7:
+        elif target_level <= 7:
             toning_shade = "10V"  # Violet to neutralize yellow
         else:
             toning_shade = "10P"  # Pearl for pale yellow
