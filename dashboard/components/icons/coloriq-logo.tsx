@@ -2,30 +2,25 @@ import React from 'react';
 
 interface LogoIconProps {
   className?: string;
-  size?: number;
-  color?: string;
+  size?: number; // font size in px for the interim wordmark
+  color?: string; // text color
 }
 
-export const ColorIqLogo: React.FC<LogoIconProps> = ({ 
-  className = '', 
-  size = 32, 
-  color = '#9333EA' 
+// INTERIM (2026-10-13, launch-blocking fix): the approved dotted-Q logo asset
+// (the @getcoloriq profile picture) is not in the repo -- BLOCKED on the asset.
+// Rendering a text "COLORiq" wordmark until it lands; swap this component's
+// body for the image when the asset arrives.
+export const ColorIqLogo: React.FC<LogoIconProps> = ({
+  className = '',
+  size = 20,
+  color = '#FFFFFF',
 }) => (
-  <div
-    className={`inline-flex items-center justify-center rounded-md font-black ${className}`}
-    style={{
-      width: size,
-      height: size,
-      background: `linear-gradient(135deg, ${color}, #EC4899)`,
-      fontSize: size * 0.48,
-      lineHeight: 1,
-      color: '#FFFFFF',
-      letterSpacing: '-0.02em',
-      flexShrink: 0,
-    }}
+  <span
+    className={'font-black tracking-tight ' + className}
+    style={{ fontSize: size, color: color, lineHeight: 1, whiteSpace: 'nowrap' }}
   >
-    CG
-  </div>
+    COLORiq
+  </span>
 );
 
 export default ColorIqLogo;

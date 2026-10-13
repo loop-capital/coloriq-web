@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { LogoutButton } from '@/components/ui/logout-button'
 import { ColorIqLogo } from '@/components/icons/coloriq-logo'
+import { getStoredAuthToken } from '@/lib/cookie-keys';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -45,7 +46,7 @@ export function Sidebar() {
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
-    const token = localStorage.getItem('colorgenius_token')
+    const token = getStoredAuthToken()
     fetch('/api/auth/me', { 
       credentials: 'include',
       headers: token ? { Authorization: `Bearer ${token}` } : {}

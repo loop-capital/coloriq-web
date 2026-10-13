@@ -13,8 +13,7 @@ export default function LandingPage() {
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(10,10,26,0.8)', backdropFilter: 'blur(20px)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #9333EA, #EC4899)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ color: 'white', fontWeight: 900, fontSize: 13 }}>CG</span></div>
-            <span style={{ color: 'white', fontWeight: 700, fontSize: 18 }}>ColorIq</span>
+            <span style={{ color: 'white', fontWeight: 900, fontSize: 18, letterSpacing: '-0.02em' }}>COLORiq</span>
           </div>
           {/* Desktop nav links — hidden on mobile */}
           <div className="hidden md:flex" style={{ alignItems: 'center', gap: 32 }}>
@@ -98,7 +97,7 @@ export default function LandingPage() {
               { icon: <Package size={22} />, title: 'Inventory Management', desc: 'Track color stock levels, set reorder alerts, and auto-deduct usage per service. Never run out of a shade mid-appointment.' },
               { icon: <BarChart3 size={22} />, title: 'Salon Analytics', desc: 'Color service revenue, most popular shades, product usage trends, and stylist performance — all in one dashboard.' },
               { icon: <Shield size={22} />, title: 'Client Safety Flags', desc: 'Automatic alerts for metallic dye, henna, previous chemical treatments, and allergies. Safety checks before every formulation.' },
-              { icon: <Package size={22} />, title: 'Formula Marketplace', desc: 'Browse and purchase verified formulas from top stylists. Every formula includes before/after photos, client hair profile, and step-by-step instructions. Buy once, use forever.' },
+              { icon: <Package size={22} />, title: 'Formula Marketplace', desc: 'Browse and purchase verified formulas from top stylists. Every formula includes before/after photos, client hair profile, and step-by-step instructions. Pay per use, from $2.99 — creators earn 70% on every use.' },
               { icon: <DollarSign size={22} />, title: 'Sell Your Formulas', desc: 'Monetize your expertise. Upload your signature formulas with photos and instructions. Set your price and earn every time another stylist purchases your creation.' },
               { icon: <ClipboardList size={22} />, title: 'Community Feed', desc: 'Share your best work, get feedback from fellow stylists, and discover trending techniques. Build a following and establish yourself as a color authority.' },
               { icon: <Palette size={22} />, title: 'Color Management System', desc: 'Centralized color catalog across all brands. Create custom shade palettes, organize by client preference, and streamline your color selection workflow.' },
@@ -151,7 +150,7 @@ export default function LandingPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
             {[
-              { icon: <Package size={22} />, title: 'Formula Marketplace', desc: 'Browse and purchase verified formulas from top stylists. Every formula includes before/after photos, client hair profile, and step-by-step instructions. Buy once, use forever.' },
+              { icon: <Package size={22} />, title: 'Formula Marketplace', desc: 'Browse and purchase verified formulas from top stylists. Every formula includes before/after photos, client hair profile, and step-by-step instructions. Pay per use, from $2.99 — creators earn 70% on every use.' },
               { icon: <DollarSign size={22} />, title: 'Sell Your Formulas', desc: 'Monetize your expertise. Upload your signature formulas with photos and instructions. Set your price and earn every time another stylist purchases your creation.' },
               { icon: <ClipboardList size={22} />, title: 'Community Feed', desc: 'Share your best work, get feedback from fellow stylists, and discover trending techniques. Build a following and establish yourself as a color authority.' },
               { icon: <Shield size={22} />, title: 'Verified Reviews', desc: 'Every purchased formula can be reviewed by the buyer. Build trust with verified ratings and detailed feedback on formula accuracy and results.' },
@@ -208,7 +207,7 @@ export default function LandingPage() {
       {/* CTA */}
       <section style={{ padding: '128px 24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ width: 64, height: 64, borderRadius: 16, background: 'linear-gradient(135deg, #9333EA, #EC4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 32px' }}><span style={{ color: 'white', fontWeight: 900, fontSize: 20 }}>CG</span></div>
+          <div style={{ fontWeight: 900, fontSize: 28, color: 'white', margin: '0 auto 32px', letterSpacing: '-0.02em' }}>COLORiq</div>
           <h2 style={{ fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 900, marginBottom: 16 }}>Your next great formulation starts here.</h2>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18, marginBottom: 40 }}>Join 50 founding stylists shaping the future of professional hair color. Free during beta. No credit card required.</p>
           <a href="/beta" style={{ ...btnPrimary, padding: '16px 40px', boxShadow: '0 0 40px rgba(147,51,234,0.2)', textDecoration: 'none' }}>Join the Beta <ArrowRight size={18} /></a>

@@ -24,6 +24,7 @@ import CorrectiveColorPanel, { CorrectiveBadge } from '@/lib/corrective-color/Co
 import DictationWidget from '@/components/custom/dictation-widget'
 import { diagnose, type CorrectiveIssue, type HairState } from '@/lib/corrective-color/engine'
 import type { ToneFamily } from '@/lib/products'
+import { getStoredAuthToken } from '@/lib/cookie-keys';
 
 const STEPS = [
   { id: 1, title: 'Photo', desc: 'Capture or upload hair photo' },
@@ -423,7 +424,7 @@ function FormulatePageContent() {
   // Zero callers existed before this; wired into selectClient and URL prefill.
   const loadLastConsultation = async (id: string) => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('colorgenius_token') : null
+      const token = getStoredAuthToken()
       const res = await fetch(`/api/clients/${id}/last-consultation`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })

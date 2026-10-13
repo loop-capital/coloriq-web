@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { jwtVerify } from 'jose';
 
 import { JWT_SECRET_KEY as JWT_SECRET } from '@/lib/auth';
+import { getAuthTokenCookie } from '@/lib/cookie-keys';
 
 const DEFAULT_CONFIG = {
   costPlusMode: true,
@@ -12,7 +13,7 @@ const DEFAULT_CONFIG = {
 };
 
 async function getSalonId(request: NextRequest): Promise<string | null> {
-  const token = request.cookies.get('colorgenius_token')?.value;
+  const token = getAuthTokenCookie((n) => request.cookies.get(n)?.value);
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);

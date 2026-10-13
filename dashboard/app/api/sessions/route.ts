@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { jwtVerify } from 'jose';
 import { JWT_SECRET_KEY } from '@/lib/auth';
+import { getAuthTokenCookie } from '@/lib/cookie-keys';
 import { rateLimit, getClientIdentifier } from '@/lib/rate-limit';
 
 async function getSalonId(request: NextRequest, bodySalonId?: string): Promise<string | null> {
   if (bodySalonId) return bodySalonId;
-  const token = request.cookies.get('colorgenius_token')?.value;
+  const token = getAuthTokenCookie((n) => request.cookies.get(n)?.value);
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET_KEY);

@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Check, X } from 'lucide-react';
+import { setStoredAuthToken } from '@/lib/cookie-keys';
 
 export default function RegisterPage() {
   return (
@@ -39,7 +40,7 @@ function RegisterContent() {
       });
       const data = await res.json();
       if (data.success) {
-        if (data.token) localStorage.setItem('colorgenius_token', data.token);
+        if (data.token) setStoredAuthToken(data.token);
         setStep(2); // Move to profile setup
       } else {
         setError(data.error?.message || 'Registration failed');
@@ -85,10 +86,7 @@ function RegisterContent() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #9333EA, #EC4899)' }}>
-            <span className="text-white font-black text-xl">CG</span>
-          </div>
+          <div className="text-white font-black text-2xl tracking-tight">COLORiq</div>
         </div>
 
         {step === 1 ? (

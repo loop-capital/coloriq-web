@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import { getStoredRememberEmail, setStoredRememberEmail, clearStoredRememberEmail, setStoredAuthToken } from '@/lib/cookie-keys';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function LoginPage() {
 
   // Load remembered email on mount
   useEffect(() => {
-    const savedEmail = localStorage.getItem("colorgenius_remember_email");
+    const savedEmail = getStoredRememberEmail();
     if (savedEmail) {
       setEmail(savedEmail);
       setRememberMe(true);
@@ -32,9 +33,9 @@ export default function LoginPage() {
 
     // Remember me logic
     if (rememberMe) {
-      localStorage.setItem("colorgenius_remember_email", emailVal);
+      setStoredRememberEmail(emailVal);
     } else {
-      localStorage.removeItem("colorgenius_remember_email");
+      clearStoredRememberEmail();
     }
 
     try {
@@ -47,7 +48,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        localStorage.setItem("colorgenius_token", data.token);
+        setStoredAuthToken(data.token);
         window.location.href = "/formulate";
       } else {
         setError(data.error || "Login failed");
@@ -62,9 +63,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#0A0A1A] flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-black text-lg">CG</span>
-          </div>
+          <div className="text-white font-black text-2xl tracking-tight mb-4">COLORiq</div>
           <h1 className="text-2xl font-bold text-white">Sign in to ColorIq</h1>
         </div>
 

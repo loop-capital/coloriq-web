@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import { TOKEN_COOKIE_NEW, TOKEN_COOKIE_LEGACY, getAuthTokenCookie } from './cookie-keys';
 
 if (!process.env.JWT_SECRET) {
   console.warn('[auth] JWT_SECRET env var is not set — using insecure fallback. Set JWT_SECRET in production.');
@@ -7,7 +8,7 @@ if (!process.env.JWT_SECRET) {
 export const JWT_SECRET_KEY = new TextEncoder().encode(
   process.env.JWT_SECRET || 'coloriq-prod-secret-2026'
 );
-const COOKIE_NAME = 'colorgenius_token';
+// Legacy cookie name retired by the 2026-10-13 migration -- see lib/cookie-keys.ts.
 
 export interface User {
   id: string;
@@ -32,29 +33,33 @@ export async function generateToken(user: User): Promise<string> {
 
 export async function getTokenFromCookie(): Promise<string | null> {
   const cookieStore = await cookies();
-  return cookieStore.get(COOKIE_NAME)?.value || null;
+  return getAuthTokenCookie((n) => cookieStore.get(n)?.value) || null;
 }
 
 export async function setAuthCookie(token: string): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, token, {
+  cookieStore.set(TOKEN_COOKIE_NEW, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 7,
     path: '/',
   });
+  // Migration: the new cookie is written -- drop the legacy one.
+  cookieStore.delete(TOKEN_COOKIE_LEGACY);
 }
 
 export async function clearAuthCookie(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 0,
-    path: '/',
-  });
+  for (const name of [TOKEN_COOKIE_NEW, TOKEN_COOKIE_LEGACY]) {
+    cookieStore.set(name, '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/',
+    });
+  }
 }
 
 /**

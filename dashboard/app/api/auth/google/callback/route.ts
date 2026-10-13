@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
+import { TOKEN_COOKIE_NEW, TOKEN_COOKIE_LEGACY } from '@/lib/cookie-keys';
 
 export async function GET(request: Request) {
   try {
@@ -104,13 +105,15 @@ export async function GET(request: Request) {
       .sign(jwtSecret);
 
     const cookieStore = await cookies();
-    cookieStore.set('colorgenius_token', sessionToken, {
+    cookieStore.set(TOKEN_COOKIE_NEW, sessionToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
+    // Migration: new cookie written -- drop the legacy one.
+    cookieStore.delete(TOKEN_COOKIE_LEGACY);
 
     return NextResponse.redirect(new URL('/dashboard', request.url));
   } catch (err: any) {

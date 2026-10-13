@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
+import { getAuthTokenCookie } from '@/lib/cookie-keys';
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'coloriq-prod-secret-2026'
@@ -31,7 +32,7 @@ export async function middleware(request: NextRequest) {
 
   if (!isPublic) {
     // Check for cookie-based auth (web dashboard)
-    const token = request.cookies.get('colorgenius_token')?.value;
+    const token = getAuthTokenCookie((n) => request.cookies.get(n)?.value);
     // Check for Bearer token auth (mobile app)
     const authHeader = request.headers.get('authorization')?.replace('Bearer ', '');
     
