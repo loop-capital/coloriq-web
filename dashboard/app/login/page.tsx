@@ -65,7 +65,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="mb-4 flex justify-center"><ColorIqLogo variant="lockup" size={120} /></div>
-          <h1 className="text-2xl font-bold text-white">Sign in to ColorIq</h1>
+          <h1 className="text-2xl font-bold text-white">Sign in to COLORiq</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
