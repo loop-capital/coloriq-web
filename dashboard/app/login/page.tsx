@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import { ColorIqLogo } from '@/components/icons/coloriq-logo';
 import { getStoredRememberEmail, setStoredRememberEmail, clearStoredRememberEmail, setStoredAuthToken } from '@/lib/cookie-keys';
 
 export default function LoginPage() {
@@ -63,7 +64,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#0A0A1A] flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="text-white font-black text-2xl tracking-tight mb-4">COLORiq</div>
+          <div className="mb-4 flex justify-center"><ColorIqLogo variant="lockup" size={120} /></div>
           <h1 className="text-2xl font-bold text-white">Sign in to ColorIq</h1>
         </div>
 
