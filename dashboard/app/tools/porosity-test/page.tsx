@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { PorosityTest } from "@/components/tools/PorosityTest";
 
 export const metadata: Metadata = {
-  title: "Hair Porosity Test | ColorIq",
+  title: "Hair Porosity Test | COLORiq",
   description: "Take a 5-question hair porosity quiz to determine low, medium, or high porosity and get personalized product and care routine recommendations.",
   openGraph: {
-    title: "Hair Porosity Test | ColorIq",
+    title: "Hair Porosity Test | COLORiq",
     description: "Discover your client’s hair porosity in 60 seconds.",
   },
 };

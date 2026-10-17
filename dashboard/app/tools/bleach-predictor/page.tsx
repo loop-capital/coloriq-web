@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { BleachPredictor } from "@/components/tools/BleachPredictor";
 
 export const metadata: Metadata = {
-  title: "Bleach Level Predictor | ColorIq",
-  description: "Predict bleach lift level, risk, and recommended technique based on starting level, developer volume, processing time, and hair condition. Free salon tool by ColorIq.",
+  title: "Bleach Level Predictor | COLORiq",
+  description: "Predict bleach lift level, risk, and recommended technique based on starting level, developer volume, processing time, and hair condition. Free salon tool by COLORiq.",
   openGraph: {
-    title: "Bleach Level Predictor | ColorIq",
+    title: "Bleach Level Predictor | COLORiq",
     description: "Know your lift and risk before you bleach.",
   },
 };

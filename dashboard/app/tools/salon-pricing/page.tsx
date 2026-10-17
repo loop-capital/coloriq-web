@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { SalonPricingCalculator } from "@/components/tools/SalonPricingCalculator";
 
 export const metadata: Metadata = {
-  title: "Salon Pricing Calculator | ColorIq",
-  description: "Calculate service pricing, profit margins, and cost breakdowns for professional hair color and salon services. Free tool by ColorIq.",
+  title: "Salon Pricing Calculator | COLORiq",
+  description: "Calculate service pricing, profit margins, and cost breakdowns for professional hair color and salon services. Free tool by COLORiq.",
   openGraph: {
-    title: "Salon Pricing Calculator | ColorIq",
+    title: "Salon Pricing Calculator | COLORiq",
     description: "Price your salon services with confidence.",
   },
 };

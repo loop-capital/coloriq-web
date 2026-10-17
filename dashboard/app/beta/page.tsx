@@ -34,7 +34,7 @@ export default function BetaPage() {
         </form>
         <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, marginTop: 12, textAlign: 'center' }}>No spam. Unsubscribe anytime.</p>
         <div style={{ textAlign: 'center', marginTop: 24 }}>
-          <a href="/" style={{ color: '#9333EA', fontSize: 14, textDecoration: 'none' }}>← Back to ColorIq</a>
+          <a href="/" style={{ color: '#9333EA', fontSize: 14, textDecoration: 'none' }}>← Back to COLORiq</a>
         </div>
       </div>
     </main>

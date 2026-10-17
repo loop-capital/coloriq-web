@@ -57,7 +57,7 @@ export default function DashboardPage() {
           className="mb-8"
         >
           <h1 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--cg-text-primary)' }}>
-            Welcome back to <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">ColorIq</span>
+            Welcome back to <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">COLORiq</span>
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--cg-text-secondary)' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}

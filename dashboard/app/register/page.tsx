@@ -92,7 +92,7 @@ function RegisterContent() {
         {step === 1 ? (
           <>
             <h1 className="text-2xl font-bold text-white text-center mb-1">Create Your Account</h1>
-            <p className="text-sm text-center mb-8" style={{ color: '#71717A' }}>Join the ColorIq professional community</p>
+            <p className="text-sm text-center mb-8" style={{ color: '#71717A' }}>Join the COLORiq professional community</p>
 
             <form onSubmit={handleRegister} className="space-y-4">
               <div>

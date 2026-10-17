@@ -87,7 +87,7 @@ export default function LandingPage() {
           <div style={{ textAlign: 'center', marginBottom: 80 }}>
             <p style={{ color: '#9333EA', fontWeight: 600, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 16 }}>Color Management Suite</p>
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 900, marginBottom: 16 }}>Everything you need at the bowl</h2>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18, maxWidth: 600, margin: '0 auto' }}>Formulation is just the start. ColorIq is a complete color management platform for professional salons.</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18, maxWidth: 600, margin: '0 auto' }}>Formulation is just the start. COLORiq is a complete color management platform for professional salons.</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
             {[
@@ -217,8 +217,8 @@ export default function LandingPage() {
       {/* Footer */}
       <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '40px 24px' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>ColorIq · AI Hair Color Formulation for Professionals</span>
-          <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>© 2026 ColorIq Inc.</p>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>COLORiq · AI Hair Color Formulation for Professionals</span>
+          <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>© 2026 COLORiq Inc.</p>
         </div>
       </footer>
     </main>

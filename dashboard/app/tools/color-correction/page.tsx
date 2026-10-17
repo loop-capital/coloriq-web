@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { ColorCorrectionCalculator } from "@/components/tools/ColorCorrectionCalculator";
 
 export const metadata: Metadata = {
-  title: "Color Correction Calculator | ColorIq",
-  description: "Find the right corrector shade, technique, and developer to neutralize unwanted hair color tones. Free salon tool by ColorIq.",
+  title: "Color Correction Calculator | COLORiq",
+  description: "Find the right corrector shade, technique, and developer to neutralize unwanted hair color tones. Free salon tool by COLORiq.",
   openGraph: {
-    title: "Color Correction Calculator | ColorIq",
+    title: "Color Correction Calculator | COLORiq",
     description: "Cancel orange, brass, yellow, red, green, ash, or purple tones with confidence.",
   },
 };

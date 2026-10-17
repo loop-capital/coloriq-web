@@ -186,7 +186,7 @@ export default function CertificationPage() {
           assessmentScore: null,
           overallProgress: 35,
           requirements: [
-            { id: 'formulations', label: 'Formulations Created', description: 'Create at least 25 formulations in ColorIq', icon: FlaskConical, target: 25, current: 8, unit: '' },
+            { id: 'formulations', label: 'Formulations Created', description: 'Create at least 25 formulations in COLORiq', icon: FlaskConical, target: 25, current: 8, unit: '' },
             { id: 'accuracy', label: 'Formula Accuracy', description: 'Maintain 80%+ average confidence on your formulas', icon: Target, target: 80, current: 72, unit: '%' },
             { id: 'community', label: 'Community Engagement', description: 'Receive 10+ likes on your posts', icon: TrendingUp, target: 10, current: 3, unit: '' },
             { id: 'active', label: 'Active Days', description: 'Be active for at least 14 days', icon: Clock, target: 14, current: 5, unit: '' },
@@ -259,7 +259,7 @@ export default function CertificationPage() {
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-[#F5F5F7] flex items-center gap-3">
                 <span className="text-3xl">✦</span>
-                ColorIq <span className="gradient-text-teal">Certified</span>
+                COLORiq <span className="gradient-text-teal">Certified</span>
               </h1>
               <p className="text-sm text-[#A1A1AA] mt-2 max-w-lg">
                 Earn the CGC badge — a recognized credential that shows clients and peers you've mastered AI-assisted color formulation.
