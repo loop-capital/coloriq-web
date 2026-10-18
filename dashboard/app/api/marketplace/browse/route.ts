@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateOrThrow, browseQuerySchema } from '@/lib/api/validation';
 import { prisma } from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/auth';
+import { hasProductAccess } from '@/lib/entitlements';
 import { ApiResponse } from '@/lib/api/types';
 import { Prisma } from '@prisma/client';
 
@@ -18,6 +19,15 @@ export async function GET(request: NextRequest) {
         success: false,
         error: { code: 'UNAUTHORIZED', message: 'Authentication required' },
       }, { status: 401 });
+    }
+
+    // HARD CLOSE (Jason, 2026-10-17): marketplace (incl. free Community tier)
+    // is consumed by subscribers only. No free layer.
+    if (!(await hasProductAccess(authUser.userId))) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        error: { code: 'SUBSCRIPTION_REQUIRED', message: 'COLORiq requires an active subscription.' },
+      }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);

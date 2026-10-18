@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
-import { loginWithCredentials, loginBeta } from '../api/client';
+import { loginWithCredentials } from '../api/client';
 
 const COLORS = {
   bg: '#0F0F1A',
@@ -50,22 +50,6 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
       }
     } catch (err: any) {
       Alert.alert('Login Failed', err.message || 'Please check your credentials and try again.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleGuestLogin() {
-    setLoading(true);
-    try {
-      const token = await loginBeta();
-      if (token) {
-        onLoginSuccess();
-      } else {
-        Alert.alert('Guest Login Failed', 'Unable to connect. Check your internet connection.');
-      }
-    } catch (err: any) {
-      Alert.alert('Connection Error', err.message || 'Check your internet connection.');
     } finally {
       setLoading(false);
     }
@@ -142,21 +126,9 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
           {/* Divider */}
           <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
           </View>
-
-          {/* Guest Login */}
-          <TouchableOpacity
-            onPress={handleGuestLogin}
-            disabled={loading}
-            style={styles.guestBtn}
-          >
-            <Text style={styles.guestBtnText}>Try as Guest</Text>
           </TouchableOpacity>
 
-          <Text style={styles.footer}>Guest mode lets you explore the app with limited features.</Text>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

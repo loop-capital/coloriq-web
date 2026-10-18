@@ -12,6 +12,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
     }
 
+    // HARD CLOSE (Jason, 2026-10-17): shared guest/beta credential retired.
+    // No self-serve free access. Team/test use named grants.
+    if (email.toLowerCase() === 'beta@colorgenius.co') {
+      return NextResponse.json(
+        { error: 'guest_retired', message: 'Guest access has been retired. COLORiq requires a subscription.' },
+        { status: 403 }
+      );
+    }
+
     const user = await prisma.users.findFirst({
       where: { email, is_active: true },
     });

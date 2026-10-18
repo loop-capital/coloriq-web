@@ -231,39 +231,11 @@ export async function submitFormulation(input: FormulationInput) {
 
 // ─── Auth / Login ──────────────────────────────────────────────
 
-const BETA_EMAIL = 'beta@colorgenius.co';
-const BETA_PASSWORD = 'betagenius';
 
 export async function ensureAuth(): Promise<string | null> {
   const token = await getAuthToken();
   if (token) return token;
   return null;
-}
-
-export async function loginBeta(): Promise<string | null> {
-  try {
-    const response = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: BETA_EMAIL, password: BETA_PASSWORD }),
-    });
-
-    if (!response.ok) {
-      console.error('[Auth] Beta login failed:', response.status);
-      return null;
-    }
-
-    const data = await response.json();
-    const token: string | undefined = data.token || data.sessionToken;
-    if (token) {
-      await setAuthToken(token);
-      return token;
-    }
-    return null;
-  } catch (err) {
-    console.error('[Auth] Beta login error:', err);
-    return null;
-  }
 }
 
 export async function loginWithCredentials(email: string, password: string): Promise<string | null> {

@@ -30,7 +30,7 @@ import {
   Image as ImageIcon,
   Check,
 } from 'lucide-react-native';
-import { apiRequest, getAuthToken, loginBeta, uploadPhotoMultipart, API_BASE, notifyUnauthorized } from '../api/client';
+import { apiRequest, getAuthToken, uploadPhotoMultipart, API_BASE, notifyUnauthorized } from '../api/client';
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
 
@@ -242,7 +242,6 @@ export default function GalleryUploadScreen({ navigation }: any) {
 
       // Get auth token
       let token = await getAuthToken();
-      if (!token) token = await loginBeta();
       if (!token) {
         Alert.alert('Auth Error', 'Unable to authenticate. Please try again.');
         setSubmitting(false);
