@@ -9,7 +9,7 @@ import { prisma } from '@/lib/prisma';
  * Grants are the revocable guest list — founding cohort, team/test, Jason.
  * They live in the `subscriptions` table by convention (no migration):
  *   tier             = 'grant:founding' | 'grant:team' | 'grant:jason'
- *   stripe_*         = null
+ *   square_*         = null
  *   status           = 'active' | 'revoked' | 'expired'
  * Revocation = set status to 'revoked'. Named via subscriber_id.
  */
