@@ -737,8 +737,8 @@ model subscriptions {
   subscriber_type           String    @db.VarChar(20)
   subscriber_id             String    @db.Uuid
   tier                      String    @db.VarChar(20)
-  stripe_customer_id        String?   @db.VarChar(255)
-  stripe_subscription_id    String?   @db.VarChar(255)
+  square_customer_id        String?   @db.VarChar(255)
+  square_subscription_id    String?   @db.VarChar(255)
   monthly_price             Decimal?  @db.Decimal(6, 2)
   annual_price              Decimal?  @db.Decimal(7, 2)
   billing_interval          String?   @db.VarChar(10)
