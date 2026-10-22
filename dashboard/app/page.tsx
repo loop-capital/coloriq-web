@@ -43,7 +43,7 @@ export default function LandingPage() {
             3,273 professional shades · 21 color brands · 90%+ formulation accuracy
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 16 }}>
-            <a href="/beta" style={{ ...btnPrimary, padding: '16px 32px', boxShadow: '0 0 40px rgba(147,51,234,0.2)', textDecoration: 'none' }}>Join the Beta <ArrowRight size={18} /></a>
+            <a href="/get-access" style={{ ...btnPrimary, padding: '16px 32px', boxShadow: '0 0 40px rgba(147,51,234,0.2)', textDecoration: 'none' }}>Get Access <ArrowRight size={18} /></a>
             <a href="#how-it-works" style={{ ...btnPrimary, background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>See How It Works</a>
           </div>
         </div>
@@ -98,7 +98,7 @@ export default function LandingPage() {
               { icon: <BarChart3 size={22} />, title: 'Salon Analytics', desc: 'Color service revenue, most popular shades, product usage trends, and stylist performance — all in one dashboard.' },
               { icon: <Shield size={22} />, title: 'Client Safety Flags', desc: 'Automatic alerts for metallic dye, henna, previous chemical treatments, and allergies. Safety checks before every formulation.' },
               { icon: <Package size={22} />, title: 'Formula Marketplace', desc: 'Browse and purchase verified formulas from top stylists. Every formula includes before/after photos, client hair profile, and step-by-step instructions. Pay per use, from $2.99 — creators earn 70% on every use.' },
-              { icon: <DollarSign size={22} />, title: 'Sell Your Formulas', desc: 'Monetize your expertise. Upload your signature formulas with photos and instructions. Set your price and earn every time another stylist purchases your creation.' },
+              { icon: <DollarSign size={22} />, title: 'Sell Your Formulas', desc: 'Monetize your expertise. Upload your signature formulas with photos and instructions. Price in one of five tiers — Community, Professional $2.99, Master $4.99, Signature $7.99, Elite $9.99 — and earn 70% on every use.' },
               { icon: <ClipboardList size={22} />, title: 'Community Feed', desc: 'Share your best work, get feedback from fellow stylists, and discover trending techniques. Build a following and establish yourself as a color authority.' },
               { icon: <Palette size={22} />, title: 'Color Management System', desc: 'Centralized color catalog across all brands. Create custom shade palettes, organize by client preference, and streamline your color selection workflow.' },
             ].map((f, i) => (
@@ -151,7 +151,7 @@ export default function LandingPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
             {[
               { icon: <Package size={22} />, title: 'Formula Marketplace', desc: 'Browse and purchase verified formulas from top stylists. Every formula includes before/after photos, client hair profile, and step-by-step instructions. Pay per use, from $2.99 — creators earn 70% on every use.' },
-              { icon: <DollarSign size={22} />, title: 'Sell Your Formulas', desc: 'Monetize your expertise. Upload your signature formulas with photos and instructions. Set your price and earn every time another stylist purchases your creation.' },
+              { icon: <DollarSign size={22} />, title: 'Sell Your Formulas', desc: 'Monetize your expertise. Upload your signature formulas with photos and instructions. Price in one of five tiers — Community, Professional $2.99, Master $4.99, Signature $7.99, Elite $9.99 — and earn 70% on every use.' },
               { icon: <ClipboardList size={22} />, title: 'Community Feed', desc: 'Share your best work, get feedback from fellow stylists, and discover trending techniques. Build a following and establish yourself as a color authority.' },
               { icon: <Shield size={22} />, title: 'Verified Reviews', desc: 'Every purchased formula can be reviewed by the buyer. Build trust with verified ratings and detailed feedback on formula accuracy and results.' },
             ].map((f, i) => (
@@ -173,26 +173,31 @@ export default function LandingPage() {
           <div style={{ textAlign: 'center', marginBottom: 64 }}>
             <p style={{ color: '#9333EA', fontWeight: 600, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 16 }}>Simple Pricing</p>
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 900, marginBottom: 16 }}>Choose Your Plan</h2>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18 }}>Professional color management that pays for itself. Start free, upgrade when you're ready.</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18 }}>COLORiq is available by subscription — there is no free tier. Base is the AI formulation engine; Full adds the complete color-management operations stack.</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gap: 12, marginBottom: 32 }}>
             {[
-              { name: 'Starter', price: '$29', period: '/mo', desc: '1 brand', features: ['Unlimited formulations', '1 color brand', 'AI learning system', 'Client history'], highlight: false },
-              { name: 'Salon', price: '$49', period: '/mo', desc: '3 brands', features: ['3 color brands', 'Color Management System', 'Advanced AI', 'Priority support'], highlight: true },
-              { name: 'Pro', price: '$79', period: '/mo', desc: '5 brands', features: ['5 color brands', 'Inventory tracking', 'Scale integration', 'Client management'], highlight: false },
-              { name: 'Elite', price: '$119', period: '/mo', desc: 'Unlimited brands', features: ['Unlimited brands', 'Full inventory', 'Custom reporting', 'API access'], highlight: false },
-            ].map((t, i) => (
-              <div key={i} style={{ position: 'relative', border: t.highlight ? '1px solid rgba(147,51,234,0.4)' : '1px solid rgba(255,255,255,0.08)', background: t.highlight ? 'rgba(147,51,234,0.08)' : 'rgba(255,255,255,0.03)', borderRadius: 16, padding: 24 }}>
-                {t.highlight && <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #9333EA, #EC4899)', color: 'white', fontSize: 10, fontWeight: 700, padding: '4px 12px', borderRadius: 999, textTransform: 'uppercase' }}>Popular</div>}
-                <h3 style={{ fontSize: 15, fontWeight: 700 }}>{t.name}</h3>
-                <p style={{ fontSize: 32, fontWeight: 900, marginTop: 12 }}>{t.price}<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)' }}>{t.period}</span></p>
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>{t.desc}</p>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                  {t.features.map((f, j) => <li key={j} style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 6 }}><span style={{ color: '#9333EA', marginRight: 6 }}>✓</span>{f}</li>)}
-                </ul>
-                <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginTop: 12 }}>After beta · Beta testers get permanent discount</p>
+              { name: 'Solo', base: '$30', full: '$50', detail: '1 stylist · 1 scale' },
+              { name: 'Team', base: '$60', full: '$100', detail: 'Up to 2 stylists · 1 scale' },
+              { name: '5', base: '$90', full: '$215', detail: 'Up to 5 stylists · 1 scale' },
+              { name: '10', base: '$150', full: '$249', detail: 'Up to 10 stylists · multiple scales' },
+              { name: '20', base: '$200', full: '$299', detail: 'Up to 20 stylists · multiple scales' },
+            ].map((t) => (
+              <div key={t.name} style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', borderRadius: 16, padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textAlign: 'left' }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 17 }}>{t.name}</div>
+                  <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>{t.detail}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>Base <strong style={{ color: '#F5F5F7' }}>{t.base}</strong>/mo</div>
+                  <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>Full <strong style={{ color: '#F5F5F7' }}>{t.full}</strong>/mo</div>
+                </div>
               </div>
             ))}
+          </div>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 15, maxWidth: 700, margin: '0 auto 32px' }}>Every tier includes color lines (2 for Solo/Team, 3 at 5 and 10, 5 at 20) — additional lines are $5/month. The formula marketplace is built in: creators earn 70% of every use.</p>
+          <div style={{ textAlign: 'center' }}>
+            <a href="/get-access" style={{ ...btnPrimary, padding: '16px 40px', textDecoration: 'none' }}>Get Access <ArrowRight size={18} /></a>
           </div>
         </div>
       </section>
@@ -209,8 +214,9 @@ export default function LandingPage() {
         <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
           <div style={{ fontWeight: 900, fontSize: 28, color: 'white', margin: '0 auto 32px', letterSpacing: '-0.02em' }}>COLORiq</div>
           <h2 style={{ fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 900, marginBottom: 16 }}>Your next great formulation starts here.</h2>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18, marginBottom: 40 }}>Join 50 founding stylists shaping the future of professional hair color. Free during beta. No credit card required.</p>
-          <a href="/beta" style={{ ...btnPrimary, padding: '16px 40px', boxShadow: '0 0 40px rgba(147,51,234,0.2)', textDecoration: 'none' }}>Join the Beta <ArrowRight size={18} /></a>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18, marginBottom: 16 }}>COLORiq is available by subscription — there is no free tier.</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 16, marginBottom: 40 }}>Salon owner? We&apos;re onboarding founding salons now — early partners who shape what COLORiq becomes.</p>
+          <a href="/get-access" style={{ ...btnPrimary, padding: '16px 40px', boxShadow: '0 0 40px rgba(147,51,234,0.2)', textDecoration: 'none' }}>Get Access <ArrowRight size={18} /></a>
         </div>
       </section>
 
