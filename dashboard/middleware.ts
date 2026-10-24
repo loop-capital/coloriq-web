@@ -31,6 +31,11 @@ const PUBLIC_PAGES = [
   '/tools',
   '/monitoring',
   '/get-access',
+  // Staged marketing site, published 2026-10-23 (Jason's order): its pages + stylesheet are public.
+  '/how-it-works',
+  '/proof',
+  '/join',
+  '/staged/styles.css',
 ];
 
 const PUBLIC_API_EXACT = [
