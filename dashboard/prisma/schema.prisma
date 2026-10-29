@@ -293,6 +293,7 @@ model formulations {
   stylist_feedback        stylist_feedback[]
 
   transformations transformations[]
+  photo_analyses        photo_analyses[]
   @@index([action_type], map: "idx_formulations_action_type")
   @@index([brand], map: "idx_formulations_brand")
   @@index([client_id], map: "idx_formulations_client")
@@ -350,6 +351,14 @@ model photo_analyses {
   client_id               String?              @db.Uuid
   photo_type              String               @db.VarChar(20)
   photo_label             String?              @db.VarChar(50)
+  // Phase 1 item 5: real pairing references at capture. photo_label keeps
+  // carrying the raw sessionId string (existing callers, incl. client-side
+  // capture uids, still rely on it); session_id is the FK and is set only
+  // when the supplied sessionId resolves to a formulation_sessions row.
+  // formulation_id is the generated formulation (formulations.id) supplied
+  // as formulaId at upload, or null when no formula context exists.
+  session_id              String?              @db.Uuid
+  formulation_id          String?              @db.Uuid
   original_url            String
   processed_url           String?
   mask_url                String?
@@ -371,6 +380,8 @@ model photo_analyses {
   hair_segmentations      hair_segmentations[]
   clients                 clients?             @relation(fields: [client_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   stylists                stylists?            @relation(fields: [stylist_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  formulation_sessions    formulation_sessions? @relation(fields: [session_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  formulations            formulations?         @relation(fields: [formulation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   texture_analyses        texture_analyses[]
 
   @@index([client_id], map: "idx_photo_analyses_client")
@@ -378,6 +389,8 @@ model photo_analyses {
   @@index([processing_status], map: "idx_photo_analyses_status")
   @@index([stylist_id], map: "idx_photo_analyses_stylist")
   @@index([photo_type], map: "idx_photo_analyses_type")
+  @@index([session_id], map: "idx_photo_analyses_session")
+  @@index([formulation_id], map: "idx_photo_analyses_formulation")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -1066,6 +1079,7 @@ model formulation_sessions {
   createdAt   DateTime  @default(now()) @db.Timestamp(6)
   completedAt DateTime? @db.Timestamp(6)
   salons      salons    @relation(fields: [salonId], references: [id])
+  photo_analyses photo_analyses[]
 }
 
 model salon_devices {
