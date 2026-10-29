@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Camera,
@@ -612,8 +612,9 @@ function PermissionDenied({ message }: { message: string }) {
 
 /* ─── Main Page ─── */
 
-export default function CapturePage() {
+function CapturePageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const {
     videoRef,
     state,
@@ -632,7 +633,11 @@ export default function CapturePage() {
     getCurrentPrompt,
     saveToGallery,
     stopStream,
-  } = useCamera();
+    handoff,
+  } = useCamera({
+    externalSessionId: searchParams.get('sessionId'),
+    externalFormulaId: searchParams.get('formulaId'),
+  });
 
   // Register service worker
   useEffect(() => {
@@ -683,6 +688,21 @@ export default function CapturePage() {
               We'll capture 3 sections: roots, mid-lengths, ends
             </p>
           </div>
+
+          {handoff.active && (
+            <div
+              className="flex items-start gap-2.5 p-4 rounded-xl text-xs"
+              style={{
+                background: 'rgba(147,51,234,0.08)',
+                border: '1px solid rgba(147,51,234,0.3)',
+              }}
+            >
+              <Info className="h-4 w-4 mt-0.5 shrink-0" style={{ color: '#9333EA' }} />
+              <p style={{ color: '#F5F5F7' }}>
+                Photographing a result — this photo will link to the formula it came from.
+              </p>
+            </div>
+          )}
 
           <HairTypeSelector
             onSelect={(type) => {
@@ -767,5 +787,15 @@ export default function CapturePage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function CapturePage() {
+  // useSearchParams() above requires a Suspense boundary (same pattern as
+  // the formulate page): without parameters this renders identically.
+  return (
+    <Suspense fallback={null}>
+      <CapturePageContent />
+    </Suspense>
   );
 }

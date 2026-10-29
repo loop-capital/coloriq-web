@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { parseHandoffParams, handoffIsActive, type HandoffParams } from '@/lib/result-handoff';
 import {
   CameraState,
   CameraFacing,
@@ -66,7 +67,23 @@ function assessLighting(video: HTMLVideoElement): LightingAssessment {
   return { ok: warnings.length === 0, brightness, warnings };
 }
 
-export function useCamera() {
+export function useCamera(options?: {
+  externalSessionId?: string | null;
+  externalFormulaId?: string | null;
+}) {
+  // Phase 1 item 6: external handoff context from the Results step
+  // (/capture?sessionId=…&formulaId=…). Values are validated here (UUID
+  // shape only); anything invalid falls back to the pre-existing internal
+  // client-uid behavior — never a crash, never an invented id.
+  const handoff: HandoffParams = useMemo(
+    () =>
+      parseHandoffParams({
+        sessionId: options?.externalSessionId ?? null,
+        formulationId: options?.externalFormulaId ?? null,
+      }),
+    [options?.externalSessionId, options?.externalFormulaId]
+  );
+  const handoffActive = handoffIsActive(handoff);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const mediaStreamTrack = useRef<MediaStreamTrack | null>(null);
@@ -82,7 +99,9 @@ export function useCamera() {
   });
 
   const [session, setSession] = useState<CaptureSession>({
-    id: uid(),
+    // A validated external session id replaces the internal client uid so
+    // uploads land under the formulation session the result came from.
+    id: handoff.sessionId ?? uid(),
     hairType: 'straight',
     photos: [],
     currentSection: 'roots',
@@ -189,7 +208,9 @@ export function useCamera() {
 
   const startCapture = useCallback(
     (hairType: HairType) => {
-      const id = uid();
+      // Preserve a validated external session id across (re)starts; without
+      // one this is exactly the old behavior (fresh client uid).
+      const id = handoff.sessionId ?? uid();
       setSession({
         id,
         hairType,
@@ -200,7 +221,7 @@ export function useCamera() {
       setState((s) => ({ ...s, step: 'camera' }));
       startStream(state.facing, state.flash);
     },
-    [startStream, state.facing, state.flash]
+    [startStream, state.facing, state.flash, handoff.sessionId]
   );
 
   const runLightingCheck = useCallback((): LightingAssessment | null => {
@@ -255,6 +276,10 @@ export function useCamera() {
             angle: photo.section,
             contentType: 'image/jpeg',
             contentLength: blob.size,
+            // Item-5 merge-time join: on main the upload route ignores this
+            // unknown field; after the item-5 merge it records the
+            // photo→formula pairing at capture.
+            ...(handoff.formulationId ? { formulaId: handoff.formulationId } : {}),
           }),
         });
 
@@ -287,6 +312,27 @@ export function useCamera() {
           ),
         }));
 
+        // Phase 1 item 6: record the result photo for a handoff capture.
+        // Best-effort — the upload already succeeded, so a writer failure
+        // must not fail the upload. NOTE: the upload route returns the
+        // public URL as `url`, not `publicUrl` (pre-existing mismatch, left
+        // as-is); the writer reads `data.url` first so it records the real URL.
+        if (handoffActive) {
+          try {
+            await fetch('/api/capture/result-photo', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionId: handoff.sessionId,
+                formulationId: handoff.formulationId,
+                photoUrl: data.url ?? publicUrl,
+              }),
+            });
+          } catch {
+            // Best-effort only; see comment above.
+          }
+        }
+
         return publicUrl;
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Upload failed';
@@ -301,7 +347,7 @@ export function useCamera() {
         return null;
       }
     },
-    [session.id]
+    [session.id, handoff]
   );
 
   const captureFrame = useCallback(async () => {
@@ -405,5 +451,7 @@ export function useCamera() {
     saveToGallery,
     stopStream,
     uploadPhoto,
+    // Phase 1 item 6: validated handoff context for the page banner.
+    handoff,
   };
 }

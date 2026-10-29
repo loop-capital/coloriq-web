@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useRef, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/use-toast'
 import { HAIR_LEVELS, BRANDS, LINES_BY_BRAND } from '@/lib/products'
 import { HairSwatch } from '@/components/ui/hair-swatch'
@@ -25,6 +25,7 @@ import DictationWidget from '@/components/custom/dictation-widget'
 import { diagnose, type CorrectiveIssue, type HairState } from '@/lib/corrective-color/engine'
 import type { ToneFamily } from '@/lib/products'
 import { getStoredAuthToken } from '@/lib/cookie-keys';
+import { buildResultHandoffUrl } from '@/lib/result-handoff';
 
 const STEPS = [
   { id: 1, title: 'Photo', desc: 'Capture or upload hair photo' },
@@ -296,6 +297,12 @@ function FormulatePageContent() {
   const [showProductSearch, setShowProductSearch] = useState(false)
   const [sessionCode, setSessionCode] = useState<string | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
+  // Phase 1 item 6: the saved formulation id, captured from the save
+  // response so the Results step can hand it to capture. Null until the
+  // formula is saved — never invented, cleared whenever a new result
+  // replaces the current one (see handleSubmit / reset paths).
+  const [formulationId, setFormulationId] = useState<string | null>(null)
+  const router = useRouter()
   const [checkingPhoto, setCheckingPhoto] = useState(false)
   const [salonId, setSalonId] = useState<string>('')
   const [clientId, setClientId] = useState<string | null>(null)
@@ -451,6 +458,16 @@ function FormulatePageContent() {
     loadLastConsultation(c.id)
   }
 
+  // Phase 1 item 6: "Photograph this result" — route to capture carrying
+  // the current session + formulation references as URL parameters
+  // (?sessionId=…&formulaId=…). buildResultHandoffUrl drops any id that is
+  // not a valid UUID, so a path with no saved formulation / no phone-code
+  // session routes to plain /capture (existing behavior) instead of
+  // forwarding a made-up id.
+  const handlePhotographResult = () => {
+    router.push(buildResultHandoffUrl(sessionId, formulationId))
+  }
+
   const handleSaveFormula = async () => {
     if (saving) return
     setSaving(true)
@@ -475,6 +492,7 @@ function FormulatePageContent() {
       const data = await res.json()
       if (data.success) {
         setSaved(true)
+        if (data.formulationId) setFormulationId(data.formulationId)
         if (data.clientId && !clientId) setClientId(data.clientId)
         toast({ title: 'Saved', description: clientName ? `Formula saved for ${clientName}` : 'Formula saved to library' })
       } else {
@@ -596,6 +614,7 @@ function FormulatePageContent() {
       if (!res.ok) throw new Error('Formulation failed')
       const data = await res.json()
       setResult(data.data)
+      setFormulationId(null)
       // Convert API result to EditFormula ingredients
       const ingredients: FormulaIngredient[] = (data.data?.steps || [])
         .filter((s: any) => s.role === 'primary' || s.role === 'secondary')
@@ -629,7 +648,7 @@ function FormulatePageContent() {
             <h1 style={{ fontSize: 30, fontWeight: 700, marginBottom: 4 }}>Create <span style={{ background: 'linear-gradient(135deg, #9333EA, #EC4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Formulation</span></h1>
             <p style={{ color: '#A1A1AA', fontSize: 14 }}>Formulate with absolute precision in 6 steps</p>
           </div>
-          <button type="button" onClick={() => { setFd({ currentLevel: 5, currentTone: 'N', targetLevel: 7, targetTone: 'N', hairType: 'normal', texture: 'medium', hairPattern: 'straight', density: 'medium', serviceType: 'full_head', chemicalHistory: [], sensitivities: [], lastChemicalService: 'never', condition: { type: 'previously_colored', porosity: 'normal', grayPercent: 0, highlights: false, highlightedPercent: 0, banding: false, hotRoots: false, previousLightener: false, multipleColors: false, greenCast: false, muddyToner: false, overAshy: false, colorGrab: false, hollowEnds: false }, brandPreference: '', linePreference: '' }); setResult(null); setPhoto(null); setStep(1) }} style={btnOutline}><RotateCcw size={14} /> Reset</button>
+          <button type="button" onClick={() => { setFd({ currentLevel: 5, currentTone: 'N', targetLevel: 7, targetTone: 'N', hairType: 'normal', texture: 'medium', hairPattern: 'straight', density: 'medium', serviceType: 'full_head', chemicalHistory: [], sensitivities: [], lastChemicalService: 'never', condition: { type: 'previously_colored', porosity: 'normal', grayPercent: 0, highlights: false, highlightedPercent: 0, banding: false, hotRoots: false, previousLightener: false, multipleColors: false, greenCast: false, muddyToner: false, overAshy: false, colorGrab: false, hollowEnds: false }, brandPreference: '', linePreference: '' }); setResult(null); setPhoto(null); setFormulationId(null); setStep(1) }} style={btnOutline}><RotateCcw size={14} /> Reset</button>
         </div>
 
         {/* Allergy / patch-test safety alert for linked client */}
@@ -1288,8 +1307,16 @@ function FormulatePageContent() {
             )}
 
             <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-              <button type="button" onClick={() => { setResult(null); setFormulaIngredients([]); setFormulaView('edit'); setSaved(false); setClientId(null); setClientName(''); setClientPhone(''); setStep(1) }} style={{ ...btnOutline, flex: 1, justifyContent: 'center' }}><RotateCcw size={14} /> New Formula</button>
+              <button type="button" onClick={() => { setResult(null); setFormulaIngredients([]); setFormulaView('edit'); setSaved(false); setFormulationId(null); setClientId(null); setClientName(''); setClientPhone(''); setStep(1) }} style={{ ...btnOutline, flex: 1, justifyContent: 'center' }}><RotateCcw size={14} /> New Formula</button>
               <button type="button" onClick={handleSaveFormula} disabled={saving || saved} style={{ ...btnPrimary, flex: 1, justifyContent: 'center', opacity: saved ? 0.6 : 1 }}><Save size={14} /> {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save to Library'}</button>
+            </div>
+
+            {/* Phase 1 item 6: result-screen → capture handoff */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+              <button type="button" onClick={handlePhotographResult} style={{ ...btnPrimary, justifyContent: 'center', width: '100%' }}><Camera size={14} /> Photograph this result</button>
+              {!sessionId && !formulationId && (
+                <p style={{ color: '#71717A', fontSize: 12, textAlign: 'center', margin: 0 }}>Save the formula first to link the photo to this result.</p>
+              )}
             </div>
 
             {/* Contextual Education */}
