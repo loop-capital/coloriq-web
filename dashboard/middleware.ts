@@ -21,6 +21,12 @@ const JWT_SECRET = new TextEncoder().encode(
  * - /get-access (the subscribe/founding-application door)
  * - /api/health, /api/square/webhook
  * - /api/v1/transformations/* (own API-key auth via resolveStylist at route level)
+ * - /r/* (pre-appointment hub pages, Phase 1 item 7: token-validated at the
+ *   page level; an invalid token renders no form and no data)
+ * - /api/consultations/* (Phase 1 item 7: route-level auth only — the
+ *   client-report POST authenticates by appointment token, every other
+ *   handler requires a stylist JWT. Middleware exemption here is NOT
+ *   authorization; see the route headers.)
  */
 
 const PUBLIC_PAGES = [
@@ -36,6 +42,8 @@ const PUBLIC_PAGES = [
   '/proof',
   '/join',
   '/staged/styles.css',
+  // Pre-appointment hub (Phase 1 item 7): token-gated pages, validated server-side.
+  '/r',
 ];
 
 const PUBLIC_API_EXACT = [
@@ -52,7 +60,9 @@ const PUBLIC_API_EXACT = [
 ];
 
 // Integration routes with their own API-key auth (route-level, resolveStylist)
-const PUBLIC_API_PREFIX = ['/api/v1/transformations/'];
+// plus pre-appointment routes (Phase 1 item 7) with route-level auth:
+// appointment token for the client-report POST, stylist JWT for the rest.
+const PUBLIC_API_PREFIX = ['/api/v1/transformations/', '/api/consultations/'];
 
 function isPublicPath(pathname: string): boolean {
   if (!pathname.startsWith('/api')) {

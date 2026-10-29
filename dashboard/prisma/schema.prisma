@@ -115,6 +115,7 @@ model clients {
   visits              visits[]
   patch_tests         client_patch_tests[]
   allergy_records     client_allergies[]
+  consultation_appointments consultation_appointments[]
 
   @@index([last_visit_at], map: "idx_clients_last_visit")
   @@index([salon_id], map: "idx_clients_salon")
@@ -495,6 +496,7 @@ model salons {
   learning_events         learning_events[]
   salon_devices           salon_devices[]
   session_codes           session_codes[]
+  consultation_appointments consultation_appointments[]
   square_connections      square_connections?
   stylists                stylists[]
   users                   users[]
@@ -1714,4 +1716,74 @@ model triage_sessions {
   @@index([salon_id, created_at(sort: Desc)], map: "idx_triage_salon_date")
   @@index([risk_grade], map: "idx_triage_grade")
   @@index([client_id], map: "idx_triage_client")
+}
+
+// ─── Phase 1 item 7 (2026-10-28): pre-appointment doors ─────────────────────
+// Minimal appointment records (COLORiq owns no bookings — see
+// lib/consultation/client-report-contract.ts header for the scoping note),
+// appointment-scoped tokens, pending client reports, and confirmed
+// consultation records. Migration UNAPPLIED — see
+// prisma/migrations/20261028_add_preappointment_doors/migration.sql.
+model consultation_appointments {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  salonId     String   @db.Uuid
+  stylistId   String   @db.Uuid
+  clientId    String   @db.Uuid
+  scheduledAt DateTime @db.Timestamp(6)
+  status      String   @default("scheduled") @db.VarChar(20)
+  createdAt   DateTime @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime @default(now()) @db.Timestamp(6)
+  salons      salons   @relation(fields: [salonId], references: [id])
+  clients     clients  @relation(fields: [clientId], references: [id])
+
+  @@index([stylistId], map: "idx_consultation_appointments_stylist")
+  @@index([clientId], map: "idx_consultation_appointments_client")
+}
+
+model client_report_tokens {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  appointmentId         String    @db.Uuid
+  stylistId             String    @db.Uuid
+  tokenHash             String    @unique @db.VarChar(64)
+  expiresAt             DateTime  @db.Timestamp(6)
+  revokedAt             DateTime? @db.Timestamp(6)
+  submissionWindowStart DateTime? @db.Timestamp(6)
+  submissionCount       Int       @default(0)
+  createdAt             DateTime  @default(now()) @db.Timestamp(6)
+
+  @@index([appointmentId], map: "idx_client_report_tokens_appointment")
+}
+
+model client_reports {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  appointmentId    String    @db.Uuid
+  tokenId          String?   @db.Uuid
+  stylistId        String    @db.Uuid
+  clientId         String    @db.Uuid
+  channel          String    @db.VarChar(20)
+  status           String    @default("pending") @db.VarChar(20)
+  fields           Json
+  unknownFields    String[]
+  serviceConsent   Boolean
+  featuringConsent Boolean   @default(false)
+  confirmedAt      DateTime? @db.Timestamp(6)
+  confirmedBy      String?   @db.Uuid
+  createdAt        DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt        DateTime  @default(now()) @db.Timestamp(6)
+
+  @@index([appointmentId], map: "idx_client_reports_appointment")
+  @@index([tokenId], map: "idx_client_reports_token")
+}
+
+model consultation_records {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  appointmentId     String    @unique @db.Uuid
+  stylistId         String    @db.Uuid
+  clientId          String    @db.Uuid
+  fields            Json
+  confirmedReportId String?   @db.Uuid
+  confirmedBy       String?   @db.Uuid
+  confirmedAt       DateTime? @db.Timestamp(6)
+  createdAt         DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt         DateTime  @default(now()) @db.Timestamp(6)
 }
