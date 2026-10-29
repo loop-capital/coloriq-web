@@ -1,41 +1,55 @@
 /**
  * GET /api/community/posts/[id]
- * Single post with comments
+ * Single post with comments.
+ *
+ * Phase 1 item 2: real DB reads, same consent rule as the feed — only
+ * the post's owner may read it. A non-owner (or anonymous reader)
+ * requesting another stylist's post gets 404, the same code as a
+ * missing post, so held-out posts do not leak their existence. Comments
+ * served are approved and unflagged only (post_comments.is_approved,
+ * is_flagged). Vote state from post_likes; user_saved always false
+ * (saves have no backing table).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { communityPosts, getCommentsForPost } from '@/lib/api/mock-data';
+import { prisma } from '@/lib/prisma';
 import { ApiResponse, CommunityPost, PostComment } from '@/lib/api/types';
-import { getCurrentUser } from '@/lib/api/auth';
+import { fetchLikeState, isOwnPost, resolveReader, serializeCommunityPost, serializePostComment } from '@/lib/pool-reads';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getCurrentUser(request);
+    const reader = await resolveReader(request);
     const { id } = await params;
 
-    const post = communityPosts.find(p => p.id === id);
-    if (!post) {
+    const post: any = await (prisma as any).community_posts.findUnique({
+      where: { id },
+      include: { stylist: { select: { id: true, display_name: true, first_name: true, last_name: true, avatar_url: true, bio: true, instagram_handle: true, follower_count: true } } },
+    });
+    if (!post || !isOwnPost(post, reader)) {
       return NextResponse.json<ApiResponse>({
         success: false,
         error: { code: 'POST_NOT_FOUND', message: 'Community post not found' },
       }, { status: 404 });
     }
 
-    const postComments = getCommentsForPost(id);
+    const commentRows = await (prisma as any).post_comments.findMany({
+      where: { post_id: id, is_approved: true, is_flagged: false },
+      include: { author: { select: { id: true, display_name: true, first_name: true, last_name: true, avatar_url: true } } },
+      orderBy: { created_at: 'asc' },
+    });
 
-    // Attach user vote state
-    if (user) {
-      const { votes } = await import('@/lib/api/mock-data');
-      post.user_liked = votes.some(v => v.post_id === id && v.user_id === user.id && v.action === 'like');
-      post.user_saved = votes.some(v => v.post_id === id && v.user_id === user.id && v.action === 'save');
-    }
+    const liked = await fetchLikeState(reader, [id]);
+    const data: { post: CommunityPost; comments: PostComment[] } = {
+      post: serializeCommunityPost(post, { liked: liked.has(id) }),
+      comments: (commentRows as any[]).map(serializePostComment),
+    };
 
     return NextResponse.json<ApiResponse<{ post: CommunityPost; comments: PostComment[] }>>({
       success: true,
-      data: { post, comments: postComments },
+      data,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to fetch post';

@@ -1,30 +1,31 @@
 /**
  * GET /api/community/trending
- * Top 20 community posts by score
+ * Top 20 community posts by score.
+ *
+ * Phase 1 item 2: real DB reads, same consent rule as the feed — only
+ * the reader's own posts (either id convention). Another stylist's post
+ * is never served here until item 4 persists consent. Anonymous readers
+ * get an empty list. Vote state from post_likes; user_saved always
+ * false (saves have no backing table).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { communityPosts } from '@/lib/api/mock-data';
 import { CommunityPost, ApiResponse } from '@/lib/api/types';
-import { getCurrentUser } from '@/lib/api/auth';
+import { fetchLikeState, fetchOwnCommunityPosts, resolveReader, serializeCommunityPost } from '@/lib/pool-reads';
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUser(request);
+    const reader = await resolveReader(request);
 
-    const posts = [...communityPosts]
-      .filter(p => p.is_public)
-      .sort((a, b) => b.score - a.score)
+    const own = await fetchOwnCommunityPosts(reader);
+    const top = [...own]
+      .sort((a, b) => Number(b.score ?? 0) - Number(a.score ?? 0))
       .slice(0, 20);
 
-    // Attach user vote state if logged in
-    if (user) {
-      const { votes } = await import('@/lib/api/mock-data');
-      posts.forEach(p => {
-        p.user_liked = votes.some(v => v.post_id === p.id && v.user_id === user.id && v.action === 'like');
-        p.user_saved = votes.some(v => v.post_id === p.id && v.user_id === user.id && v.action === 'save');
-      });
-    }
+    const liked = await fetchLikeState(reader, top.map((p) => p.id));
+    const posts: CommunityPost[] = top.map((p) =>
+      serializeCommunityPost(p, { liked: liked.has(p.id) })
+    );
 
     return NextResponse.json<ApiResponse<CommunityPost[]>>({
       success: true,

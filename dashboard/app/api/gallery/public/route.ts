@@ -1,11 +1,22 @@
 /**
  * GET /api/gallery/public
- * Public consumer gallery — NO auth required
+ * Public consumer gallery — NO auth required.
+ *
+ * Phase 1 item 2: real DB reads. Serves published transformations with a
+ * valid stored marketing consent record (see lib/pool-reads.ts). No
+ * community posts: community_posts carries no stored consent, so no read
+ * filter can verify consent for another stylist's post (item 4 owns
+ * consent persistence).
+ *
+ * Known limitation, stated not silent: transformations carry no season
+ * signal, so a ?season= query matches nothing (total 0). The old route
+ * served mock items with fabricated seasons; this route does not invent
+ * one. color_family filters on the tone-derived family.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateOrThrow, galleryQuerySchema } from '@/lib/api/validation';
-import { galleryItems } from '@/lib/api/mock-data';
+import { fetchConsentedTransformations, transformationToGalleryItem } from '@/lib/pool-reads';
 import { GalleryItem, ApiResponse } from '@/lib/api/types';
 
 export async function GET(request: NextRequest) {
@@ -19,15 +30,16 @@ export async function GET(request: NextRequest) {
     };
     const query = validateOrThrow(galleryQuerySchema, raw);
 
-    let items = [...galleryItems];
+    let items = (await fetchConsentedTransformations()).map(transformationToGalleryItem);
 
     // Apply filters
     if (query.season) {
-      items = items.filter(i => i.season === query.season);
+      // No season signal exists on transformations — a season query honestly matches nothing.
+      items = [];
     }
     if (query.color_family) {
       items = items.filter(
-        i => i.formulation_snapshot.color_family.toLowerCase() === query.color_family!.toLowerCase()
+        (i) => i.formulation_snapshot.color_family.toLowerCase() === query.color_family!.toLowerCase()
       );
     }
 
@@ -37,7 +49,7 @@ export async function GET(request: NextRequest) {
     // Cursor pagination
     let startIdx = 0;
     if (query.cursor) {
-      const idx = items.findIndex(i => i.id === query.cursor);
+      const idx = items.findIndex((i) => i.id === query.cursor);
       if (idx >= 0) startIdx = idx + 1;
     }
 

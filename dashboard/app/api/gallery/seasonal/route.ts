@@ -1,10 +1,16 @@
 /**
  * GET /api/gallery/seasonal
- * Seasonal color collections — NO auth required
+ * Seasonal color collections — NO auth required.
+ *
+ * Phase 1 item 2: there is no seasonal-collection entity in the database
+ * — the old route served hand-written mock collections. Returning an
+ * empty list is the honest answer until an editorial collection model
+ * exists; inventing collections from transformation data (which carries
+ * no season signal) would fabricate curation. The envelope and the
+ * ?season= param are unchanged.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { seasonalCollections } from '@/lib/api/mock-data';
 import { SeasonalCollection, ApiResponse } from '@/lib/api/types';
 
 export async function GET(request: NextRequest) {
@@ -12,16 +18,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const season = searchParams.get('season');
 
-    let collections = [...seasonalCollections];
-
-    if (season) {
-      collections = collections.filter(
-        c => c.season.toLowerCase() === season.toLowerCase()
-      );
-    }
-
-    // Sort by newest first
-    collections.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    // No seasonal collections exist in the DB; nothing to filter.
+    const collections: SeasonalCollection[] = [];
+    void season;
 
     return NextResponse.json<ApiResponse<SeasonalCollection[]>>({
       success: true,

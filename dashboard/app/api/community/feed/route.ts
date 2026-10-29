@@ -1,17 +1,30 @@
 /**
  * GET /api/community/feed
- * Paginated community feed with filtering
+ * Paginated community feed with filtering.
+ *
+ * Phase 1 item 2: real DB reads. community_posts carries no stored
+ * consent record, so no read filter can verify consent for another
+ * stylist's post (item 4 owns consent persistence). The feed therefore
+ * serves ONLY the reader's own posts (either id convention: the JWT
+ * user id or the resolved stylist id), plus nothing else. Anonymous
+ * readers get an empty list — not an error, and not other stylists'
+ * unconsented posts. Transformations are gallery content and are not
+ * shoehorned into the CommunityPost shape here.
+ *
+ * Vote state comes from post_likes (likes only); user_saved is always
+ * false because saves have no backing table (the vote route already
+ * returns 501 for save/unsave). Search and sort run over the reader's
+ * own posts, matching the old route's substring semantics; 'following'
+ * behaves as 'newest' because no follow graph exists.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { feedQuerySchema, validateOrThrow } from '@/lib/api/validation';
-import { communityPosts } from '@/lib/api/mock-data';
 import { ApiResponse, CommunityPost } from '@/lib/api/types';
-import { getCurrentUser } from '@/lib/api/auth';
+import { fetchLikeState, fetchOwnCommunityPosts, resolveReader, serializeCommunityPost } from '@/lib/pool-reads';
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUser(request);
+    const reader = await resolveReader(request);
 
     const searchParams = request.nextUrl.searchParams;
     const cursor = searchParams.get('cursor');
@@ -19,41 +32,36 @@ export async function GET(request: NextRequest) {
     const filter = searchParams.get('filter') || 'newest';
     const search = searchParams.get('search') || '';
 
-    let posts = [...communityPosts].filter(p => p.is_public);
+    const own = await fetchOwnCommunityPosts(reader);
 
-    // Search filter
+    // Search filter (substring, as the old route)
+    let posts = own;
     if (search) {
       const q = search.toLowerCase();
-      posts = posts.filter(p =>
-        p.content?.toLowerCase().includes(q) ||
-        p.caption?.toLowerCase().includes(q) ||
-        p.tags.some(t => t.toLowerCase().includes(q)) ||
-        p.author_name.toLowerCase().includes(q) ||
-        p.author_handle?.toLowerCase().includes(q) ||
-        p.formulation_snapshot?.brand.toLowerCase().includes(q) ||
-        p.formulation_snapshot?.shade_code.toLowerCase().includes(q)
+      posts = posts.filter((p) =>
+        (p.content || '').toLowerCase().includes(q) ||
+        (p.title || '').toLowerCase().includes(q) ||
+        (p.tags || []).some((t: string) => t.toLowerCase().includes(q)) ||
+        (p.formula_label || '').toLowerCase().includes(q)
       );
     }
 
     // Sort
     if (filter === 'trending') {
-      posts.sort((a, b) => b.score - a.score);
+      posts.sort((a, b) => Number(b.score ?? 0) - Number(a.score ?? 0));
     } else {
       posts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
 
     // Cursor pagination (skip N)
     const skip = cursor ? parseInt(cursor) : 0;
-    const page = posts.slice(skip, skip + limit);
+    const pageRows = posts.slice(skip, skip + limit);
 
-    // Attach user vote state if logged in
-    if (user) {
-      const { votes } = await import('@/lib/api/mock-data');
-      page.forEach(p => {
-        p.user_liked = votes.some(v => v.post_id === p.id && v.user_id === user.id && v.action === 'like');
-        p.user_saved = votes.some(v => v.post_id === p.id && v.user_id === user.id && v.action === 'save');
-      });
-    }
+    // Attach user vote state if logged in (likes only; saves have no backing table)
+    const liked = await fetchLikeState(reader, pageRows.map((p) => p.id));
+    const page: CommunityPost[] = pageRows.map((p) =>
+      serializeCommunityPost(p, { liked: liked.has(p.id) })
+    );
 
     const nextCursor = skip + page.length < posts.length ? String(skip + limit) : undefined;
 
