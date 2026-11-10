@@ -1,22 +1,22 @@
-# Connecting Your Muse to COLORgenius
+# Connecting Your Muse to COLORiq
 
 **What this is:** a one-time setup (~2 minutes) that lets your personal Muse
-assistant work with your COLORgenius account — guided consultations, processing
+assistant work with your COLORiq account — guided consultations, processing
 reminders, and transformation posts.
 
-**What this is not:** COLORgenius does not see your Muse conversations. Your Muse
-connects to COLORgenius; COLORgenius never connects to your Muse.
+**What this is not:** COLORiq does not see your Muse conversations. Your Muse
+connects to COLORiq; COLORiq never connects to your Muse.
 
 ---
 
 ## Step 1 — Get your API token
 
-Your API token is what proves to COLORgenius that it's really you.
+Your API token is what proves to COLORiq that it's really you.
 
-- **Pilot:** your token is issued by the COLORgenius team and shared with you
+- **Pilot:** your token is issued by the COLORiq team and shared with you
   securely. Keep it somewhere safe — like a password.
 - **Later:** you'll be able to issue and revoke your own tokens from the
-  COLORgenius dashboard (Settings → API tokens).
+  COLORiq dashboard (Settings → API tokens).
 
 One token per stylist. Never share yours — it's tied to your account, your
 formulations, and your clients.
@@ -25,9 +25,9 @@ formulations, and your clients.
 
 Open Muse (phone app or muse.ai) and send this message:
 
-> Build a custom connector to COLORgenius using this API spec:
+> Build a custom connector to COLORiq using this API spec:
 > https://YOUR_DEPLOYMENT_URL/openapi.json
-> Then save it as a skill called "COLORgenius".
+> Then save it as a skill called "COLORiq".
 
 Muse will read the spec, build the connector, and test it — right in the chat.
 
@@ -43,7 +43,7 @@ When Muse needs your credentials, it will show a **secure credential prompt**
 
 ## Step 4 — Set your approval policy
 
-In Muse's Settings → Connectors → COLORgenius, set the approval policy:
+In Muse's Settings → Connectors → COLORiq, set the approval policy:
 
 | What | Policy | Why |
 |---|---|---|
@@ -70,7 +70,7 @@ rule, not a suggestion.
 ## Revoking access
 
 Lost your phone, or just want to disconnect? Your token can be revoked from the
-COLORgenius side at any time (contact the team during pilot; self-service
+COLORiq side at any time (contact the team during pilot; self-service
 revocation ships with the dashboard UI). Revoking the token immediately cuts
 your Muse's access — no other changes needed.
 

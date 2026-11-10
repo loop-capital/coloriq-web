@@ -259,15 +259,15 @@
     },
     "securitySchemes": {
       "bearerAuth": {
-        "description": "Per-stylist API token, issued in the COLORgenius dashboard (Settings > API tokens). Sent as Authorization: Bearer <token>. Tokens carry scopes: transformations:read, transformations:write. Enter the token via Muse's secure credential prompt \u2014 never paste it into chat.",
+        "description": "Per-stylist API token, issued in the COLORiq dashboard (Settings > API tokens). Sent as Authorization: Bearer <token>. Tokens carry scopes: transformations:read, transformations:write. Enter the token via Muse's secure credential prompt \u2014 never paste it into chat.",
         "scheme": "bearer",
         "type": "http"
       }
     }
   },
   "info": {
-    "description": "COLORgenius is the AI formulation platform for professional hair colorists. This API is the thin-adapter surface for the Muse custom connector: it exposes the consultation, formulation, and transformation lifecycle. All intelligence (formulation engine, consent gates, publishing rules) lives in the COLORgenius backend \u2014 the connector is a dumb pipe.\n\nTHE CONSENT BRIGHT LINE: a transformation draft's existence never implies permission to publish. Publishing requires a separate marketing consent record. POST /transformations/{id}/publish returns 422 CONSENT_REQUIRED without one.\n\nNOTE: there is currently no GET /api/formulations/{id}. Formulation details are returned inline by POST /api/formulate (session auth) and referenced by formulation_id on transformations. A token-authenticated formulation read is a planned follow-up.",
-    "title": "COLORgenius Connector API",
+    "description": "COLORiq is the AI formulation platform for professional hair colorists. This API is the thin-adapter surface for the Muse custom connector: it exposes the consultation, formulation, and transformation lifecycle. All intelligence (formulation engine, consent gates, publishing rules) lives in the COLORiq backend \u2014 the connector is a dumb pipe.\n\nTHE CONSENT BRIGHT LINE: a transformation draft's existence never implies permission to publish. Publishing requires a separate marketing consent record. POST /transformations/{id}/publish returns 422 CONSENT_REQUIRED without one.\n\nNOTE: GET /api/v1/formulations/{id} is the token-authenticated formulation read (owner-scoped, Bearer token). Formulation details are also returned inline by POST /api/formulate (session auth) and referenced by formulation_id on transformations.",
+    "title": "COLORiq Connector API",
     "version": "1.0.0"
   },
   "openapi": "3.0.3",
@@ -926,7 +926,7 @@
     "/api/v1/formulations/{id}": {
       "get": {
         "summary": "Read a formulation",
-        "description": "Retrieve a single formulation by ID, scoped to the authenticated stylist. Returns shades, mixing ratios, developer volume, application order, and processing_instructions \u2014 the formula-aware staged check intervals that drive the processing reminders (e.g. check mids at 20 min, pull at 35). Use this after colorgenius_submit_consultation returns a formulation ID, or to re-read the formulation mid-service.",
+        "description": "Retrieve a single formulation by ID, scoped to the authenticated stylist. Returns shades, mixing ratios, developer volume, application order, and processing_instructions \u2014 the formula-aware staged check intervals that drive the processing reminders (e.g. check mids at 20 min, pull at 35). Use this after coloriq_submit_consultation returns a formulation ID, or to re-read the formulation mid-service.",
         "operationId": "getFormulation",
         "tags": [
           "formulations"
@@ -971,7 +971,7 @@
   ],
   "servers": [
     {
-      "description": "Production COLORgenius deployment (replace with the actual Vercel URL)",
+      "description": "Production COLORiq deployment (replace with the actual Vercel URL)",
       "url": "https://YOUR_DEPLOYMENT_URL"
     }
   ],

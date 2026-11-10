@@ -1,23 +1,23 @@
-# COLORgenius
+# COLORiq
 
-COLORgenius is the AI formulation platform for professional hair colorists.
+COLORiq is the AI formulation platform for professional hair colorists.
 It turns a structured consultation into a precise, repeatable color formula —
 no guesswork at the chair.
 
 ## What this connector does
 
-This connector lets a stylist's Muse act on their COLORgenius account across
+This connector lets a stylist's Muse act on their COLORiq account across
 the full service lifecycle:
 
 1. **Guided consultation** — Muse asks the consultation questions in order and
    submits the answers via the dictation endpoint. Nothing gets skipped.
-2. **Formulation** — COLORgenius generates the formula from the consultation.
+2. **Formulation** — COLORiq generates the formula from the consultation.
 3. **Processing reminders** — Muse sets persistent, formula-aware check-in
    reminders (check mids at 20 min, pull at 35) using its native reminder
    capability. Reminders must repeat until the stylist acknowledges — a missed
    processing check damages hair.
 4. **Transformation posts** — after the service, the stylist takes before/after
-   photos in the COLORgenius app. Muse pulls them via the API, combines them
+   photos in the COLORiq app. Muse pulls them via the API, combines them
    with the formula into a transformation post, and publishes it — but only
    behind the marketing-consent gate.
 
