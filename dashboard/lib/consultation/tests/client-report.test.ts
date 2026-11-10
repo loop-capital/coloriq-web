@@ -52,8 +52,9 @@ describe('pinned contract shape (28-vs-26 reconciliation)', () => {
     expect([...dictateKeys].sort()).toEqual([...FIELD_KEYS].sort());
   });
 
-  it('classifies 21 client-reportable and 15 photo-observed keys', () => {
-    expect(PINNED_CONTRACT.filter((d) => d.reportableBy === 'client')).toHaveLength(21);
+  it('classifies 19 client-reportable, 15 photo-observed, and 2 stylist-supplied keys', () => {
+    expect(PINNED_CONTRACT.filter((d) => d.reportableBy === 'client')).toHaveLength(19);
+    expect(PINNED_CONTRACT.filter((d) => d.reportableBy === 'stylist')).toHaveLength(2);
     expect(PINNED_CONTRACT.filter((d) => d.reportableBy === 'photo')).toHaveLength(15);
     expect(PINNED_MAP.get('condition.grayPercent')?.reportableBy).toBe('photo');
     expect(PINNED_MAP.get('greyCoverageNeed')?.reportableBy).toBe('client');
@@ -62,7 +63,7 @@ describe('pinned contract shape (28-vs-26 reconciliation)', () => {
 
   it('orders client-reportable fields by design group (history before target)', () => {
     const keys = CLIENT_REPORTABLE_FIELDS.map((d) => d.key);
-    expect(keys).toHaveLength(21);
+    expect(keys).toHaveLength(19);
     const idx = (k: string) => keys.indexOf(k);
     expect(idx('chemicalHistory')).toBeLessThan(idx('sensitivities'));
     expect(idx('sensitivities')).toBeLessThan(idx('targetLevel'));
@@ -70,7 +71,8 @@ describe('pinned contract shape (28-vs-26 reconciliation)', () => {
     expect(idx('greyCoverageNeed')).toBeLessThan(idx('conditionNotes'));
     expect(idx('wantsAvoid')).toBeLessThan(idx('inspirationNotes'));
     expect(idx('serviceType')).toBeLessThan(idx('hairType'));
-    expect(idx('hairType')).toBeLessThan(idx('brandPreference'));
+    expect(keys).not.toContain('brandPreference');
+    expect(keys).not.toContain('linePreference');
   });
 });
 

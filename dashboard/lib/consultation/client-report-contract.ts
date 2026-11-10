@@ -31,7 +31,9 @@
  *     supersedes the count, and any future claim about "26 fields" must cite
  *     this file, not the design note.
  *   - Total pinned keys: 36 (28 dictate + 8 client-added). Client-reportable:
- *     21 (13 dictate + 8 added). Photo/stylist-observed: 15.
+ *     19 (11 dictate + 8 added). Photo/stylist-observed: 15. Stylist-supplied: 2
+ *     (brandPreference, linePreference - Jason ruling 2026-11-10: clients do not
+ *     choose the brand or line; the stylist does).
  *
  * -- TRUST CLASSES --
  * reportableBy 'client': the client can truthfully self-report this before
@@ -146,8 +148,8 @@ const DICTATE_CLASS: Record<string, { reportableBy: ReportableBy; group: Contrac
   'condition.overAshy': { reportableBy: 'photo', group: 'observed' },
   'condition.colorGrab': { reportableBy: 'photo', group: 'observed' },
   'condition.hollowEnds': { reportableBy: 'photo', group: 'observed' },
-  brandPreference: { reportableBy: 'client', group: 'preferences' },
-  linePreference: { reportableBy: 'client', group: 'preferences' },
+  brandPreference: { reportableBy: 'stylist', group: 'preferences', note: 'Jason ruling 2026-11-10: clients do not choose the brand; the stylist does. Most salons carry one to two lines.' },
+  linePreference: { reportableBy: 'stylist', group: 'preferences', note: 'Jason ruling 2026-11-10: clients do not choose the line; the stylist does.' },
 };
 
 /** 8 client-only keys for design groups with no dictate key. */
