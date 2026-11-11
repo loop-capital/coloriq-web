@@ -23,6 +23,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/auth';
 import { getSalonIdForUser } from '@/lib/stylist';
+import { resolveStylist } from '@/lib/transformation-auth';
 import {
   DICTATION_SYSTEM_PROMPT,
   DICTATION_JSON_SCHEMA,
@@ -52,12 +53,34 @@ interface OpenAIChatResponse {
 }
 
 export async function POST(request: NextRequest) {
+  // Auth: session/JWT (existing browser flow) OR per-stylist API token
+  // (Muse connector — Authorization: Bearer <token>, no browser session).
+  // Token auth resolves through the shared transformation-auth helper so the
+  // connector's credential works here identically to the v1 API surface.
+  let meteredStylistId: string;
+  let salonId: string | null;
+
   const authUser = await getUserFromRequest(request);
-  if (!authUser) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (authUser) {
+    meteredStylistId = authUser.userId;
+    salonId = await getSalonIdForUser(authUser.userId);
+  } else {
+    const tokenStylist = await resolveStylist(request);
+    if (!tokenStylist) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const full = await prisma.stylists.findUnique({
+      where: { id: tokenStylist.id },
+      select: { user_id: true, salon_id: true },
+    });
+    meteredStylistId = full?.user_id ?? tokenStylist.id;
+    // Salon resolution mirrors the session path (users.salon_id); falls back
+    // to the stylist record's own salon_id when no user is linked.
+    salonId = full?.user_id
+      ? await getSalonIdForUser(full.user_id)
+      : (full?.salon_id ?? null);
   }
 
-  const salonId = await getSalonIdForUser(authUser.userId);
   if (!salonId) {
     return NextResponse.json({ error: 'Your account isn’t linked to a salon yet.' }, { status: 400 });
   }
@@ -179,7 +202,7 @@ export async function POST(request: NextRequest) {
     await prisma.voice_assistant_usage.create({
       data: {
         salon_id: salonId,
-        stylist_id: authUser.userId,
+        stylist_id: meteredStylistId,
         question: transcript.slice(0, 1000),
         cost_cents: costCents,
         est_minutes: estMinutes,

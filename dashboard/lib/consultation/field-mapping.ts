@@ -260,6 +260,39 @@ export const FIELD_SCHEMA: FieldDef[] = [
     examples: ['hollow ends', 'see-through ends'],
   },
   {
+    key: 'condition.breakage', label: 'Breakage', kind: 'boolean',
+    examples: ['breakage', 'breaking off', 'snapping'],
+  },
+  {
+    key: 'condition.baldPatches', label: 'Bald patches', kind: 'boolean',
+    examples: ['bald patches', 'bald spots', 'thinning patches'],
+  },
+  {
+    key: 'condition.scalpIrritation', label: 'Scalp irritation/redness', kind: 'boolean',
+    examples: ['scalp irritation', 'red scalp', 'irritated scalp', 'scalp redness'],
+  },
+
+
+
+  {
+    key: 'medicalHistory.medications', label: 'Medications', kind: 'stringList',
+    examples: ['blood pressure meds', 'thyroid medication'],
+    hint: 'Current medications. Free text list.',
+  },
+  {
+    key: 'medicalHistory.surgeries', label: 'Surgeries', kind: 'stringList',
+    examples: ['recent surgery', 'had surgery last year'],
+    hint: 'Past surgeries. Free text list.',
+  },
+  {
+    key: 'medicalHistory.notes', label: 'Medical notes', kind: 'string', maxLength: 500,
+    examples: ['autoimmune condition', 'undergoing treatment'],
+    hint: 'Other medical history relevant to processing. Free text.',
+  },
+
+
+
+  {
     key: 'brandPreference', label: 'Brand', kind: 'string', maxLength: 64,
     examples: ['using redken', 'wella please'],
     hint: 'Brand display name as spoken (e.g. "Redken"). Free text.',

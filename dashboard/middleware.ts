@@ -57,6 +57,8 @@ const PUBLIC_API_EXACT = [
   '/api/auth/entitlement',
   '/api/health',
   '/api/square/webhook',
+  '/openapi.json',   // Muse connector: public API spec (Muse fetches this unauthenticated)
+  '/llms.txt',       // Muse connector: public service description
 ];
 
 // Integration routes with their own API-key auth (route-level, resolveStylist)
