@@ -67,10 +67,12 @@ const PUBLIC_API_EXACT = [
 const PUBLIC_API_PREFIX = ['/api/v1/transformations/', '/api/consultations/'];
 
 function isPublicPath(pathname: string): boolean {
+  // Exact list first: it holds non-/api public paths too (/openapi.json,
+  // /llms.txt), which the /api branch below would never reach.
+  if (PUBLIC_API_EXACT.includes(pathname)) return true;
   if (!pathname.startsWith('/api')) {
     return PUBLIC_PAGES.some((p) => pathname === p || pathname.startsWith(p + '/'));
   }
-  if (PUBLIC_API_EXACT.includes(pathname)) return true;
   return PUBLIC_API_PREFIX.some((p) => pathname.startsWith(p));
 }
 
