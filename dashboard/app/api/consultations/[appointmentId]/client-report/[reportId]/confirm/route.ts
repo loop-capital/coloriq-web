@@ -33,6 +33,7 @@ import {
   detectConflicts,
   validateMergeFields,
 } from '@/lib/consultation/client-report-contract';
+import { syncReportConsentsToStore } from '@/lib/consultation/consent-bridge';
 
 const confirmSchema = z.object({
   resolvedFields: z.record(z.string(), z.unknown()),
@@ -115,6 +116,21 @@ export async function POST(
   const confirmedReport = await prisma.client_reports.update({
     where: { id: report.id },
     data: { status: 'confirmed', confirmedAt: now, confirmedBy: authUser.userId },
+  });
+  // Consent bridge (beta plan §5.2): the report's (a)/(b) values reach the
+  // item-4 consent_records store, so the push-time gate reads what the client
+  // actually answered. wording_version stays null until Gideon clears one.
+  // Runs after the confirmation; a failure here surfaces as a 500 with the
+  // confirmation already saved — the rehearsal exercises this path.
+  await syncReportConsentsToStore({
+    appointmentId,
+    clientId: appointment.clientId,
+    stylistId: appointment.stylistId,
+    serviceConsent: report.serviceConsent,
+    featuringConsent: report.featuringConsent,
+    attestedAt: report.createdAt,
+    reportId: report.id,
+    channel: report.channel,
   });
   return NextResponse.json({ record: saved, report: confirmedReport });
 }
