@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { getUserFromRequest } from '@/lib/auth'
 import { getOrCreateStylistForUser } from '@/lib/stylist'
-
-const prisma = new PrismaClient()
+import { resolveReader, isServablePhoto, PUBLISHED_TRANSFORMATION_WHERE } from '@/lib/v1-gallery-consent'
 
 // GET /api/v1/gallery/photos?formulaId=...&stylistId=...&sort=score|recent&limit=20&offset=0
 export async function GET(req: NextRequest) {
@@ -15,6 +14,11 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100)
     const offset = parseInt(searchParams.get('offset') || '0')
 
+    // Consent gate (Phase 1 item 2, ruling 2026-10-28 option (a)): optional
+    // auth — anonymous readers and auth failures degrade to anonymous, never
+    // 401/500 for a missing/invalid token on this GET.
+    const reader = await resolveReader(req)
+
     const where: any = { is_approved: true }
     if (formulaId) where.formula_id = formulaId
     if (stylistId) where.stylist_id = stylistId
@@ -25,21 +29,62 @@ export async function GET(req: NextRequest) {
       sort === 'featured' ? { is_featured: 'desc' as const, score: 'desc' as const } :
       { created_at: 'desc' as const }
 
-    const [photos, total] = await Promise.all([
-      prisma.formula_photos.findMany({
-        where,
-        orderBy,
-        take: limit,
-        skip: offset,
-        include: {
-          photo_tags: { select: { tag: true } },
-          _count: { select: { photo_comments: true } },
-          stylists: { select: { display_name: true, first_name: true, avatar_url: true } },
-          formulas: { select: { product_brand: true, product_shade: true } },
+    // DB-level consent arm: the reader's own photos, OR photos whose formula
+    // has a published transformation with an after photo (via
+    // formulas -> formula_listings -> transformations; see
+    // lib/v1-gallery-consent.ts SCHEMA NOTE). This arm narrows candidates
+    // only — consent VALIDITY is enforced by the JS filter below, which
+    // JSON cannot express in a Prisma where.
+    const consentArm: any = {
+      OR: [
+        ...(reader.stylistId ? [{ stylist_id: reader.stylistId }] : []),
+        {
+          formulas: {
+            formula_listings: {
+              some: {
+                transformations: { some: { ...PUBLISHED_TRANSFORMATION_WHERE } },
+              },
+            },
+          },
         },
-      }),
-      prisma.formula_photos.count({ where }),
-    ])
+      ],
+    }
+    const gatedWhere: any = { AND: [where, consentArm] }
+
+    // Pagination tradeoff (documented, deliberate): because consent validity
+    // is enforced in JS, a DB count would overcount the gated set. Fetch the
+    // candidate set ordered as today WITHOUT take/skip, JS-filter to the
+    // servable set, then slice by limit/offset and set total to the servable
+    // count. Full candidate scan per page; acceptable at gallery scale. A
+    // DB-level consent column / consent_records join is the follow-up.
+    const candidates = await prisma.formula_photos.findMany({
+      where: gatedWhere,
+      orderBy,
+      include: {
+        photo_tags: { select: { tag: true } },
+        _count: { select: { photo_comments: true } },
+        stylists: { select: { display_name: true, first_name: true, avatar_url: true } },
+        // include (not select) so product_brand/product_shade still reach
+        // the serializer below; nested listings carry the transformations
+        // the JS consent filter reads. No consent value is serialized.
+        formulas: {
+          include: {
+            formula_listings: {
+              include: {
+                transformations: {
+                  where: { status: 'published' },
+                  select: { status: true, after_photo_ref: true, client_consent: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+
+    const servable = candidates.filter((p) => isServablePhoto(p as any, reader))
+    const total = servable.length
+    const photos = servable.slice(offset, offset + limit)
 
     return NextResponse.json({
       items: photos.map(p => ({
