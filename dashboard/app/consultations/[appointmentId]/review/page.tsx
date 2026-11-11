@@ -292,6 +292,12 @@ export default function ReviewPage() {
           )}
         </div>
       )}
+      <a
+        className="ml-3 text-sm underline"
+        href={`/formulate?appointmentId=${encodeURIComponent(appointmentId)}&clientId=${encodeURIComponent(data.appointment.clientId)}`}
+      >
+        Open in wizard
+      </a>
       <button
         className="bg-black text-white rounded px-5 py-2 disabled:opacity-50"
         disabled={confirming || unresolved.length > 0}

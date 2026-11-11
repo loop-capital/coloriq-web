@@ -409,6 +409,27 @@ function FormulatePageContent() {
       if (Object.keys(updates).length > 0) {
         setFd((prev) => applyDottedUpdates(prev, updates))
       }
+      // Appointment brand/line (Jason ruling 2026-11-10): the stylist selects
+      // the brand/line at appointment creation and the wizard pre-fills from
+      // it — the client never chooses brand/line. Fetched last so the current
+      // appointment wins over the last visit's baseline. Only fills empty
+      // fields, so a manual change made before the fetch lands is never
+      // overwritten; values outside the known brand/line lists are ignored.
+      const appointmentId = searchParams.get('appointmentId')
+      if (appointmentId) {
+        try {
+          const res = await fetch(`/api/consultations/${appointmentId}/client-report`)
+          const data = await res.json()
+          const brand = data?.appointment?.brand as string | undefined
+          const line = data?.appointment?.line as string | undefined
+          const lines = brand && BRANDS.includes(brand) ? (LINES_BY_BRAND[brand] || []) : []
+          setFd((prev) => ({
+            ...prev,
+            brandPreference: !prev.brandPreference && brand && BRANDS.includes(brand) ? brand : prev.brandPreference,
+            linePreference: !prev.linePreference && line && lines.includes(line) ? line : prev.linePreference,
+          }))
+        } catch (e) { console.error('Appointment prefill failed:', e) }
+      }
     }
     run()
     // eslint-disable-next-line react-hooks/exhaustive-deps
