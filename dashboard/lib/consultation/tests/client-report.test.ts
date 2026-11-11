@@ -41,21 +41,21 @@ function makeRecord(overrides: Partial<TokenRecord> = {}): TokenRecord {
   };
 }
 
-describe('pinned contract shape (28-vs-26 reconciliation)', () => {
-  it('pins 36 keys: 28 dictate + 8 client-added, no drops, no merges', () => {
-    expect(PINNED_CONTRACT).toHaveLength(36);
-    expect(PINNED_CONTRACT.filter((d) => d.source === 'dictate')).toHaveLength(28);
+describe('pinned contract shape (28-vs-26 reconciliation, 34 dictate after spike)', () => {
+  it('pins 42 keys: 34 dictate + 8 client-added, no drops, no merges', () => {
+    expect(PINNED_CONTRACT).toHaveLength(42);
+    expect(PINNED_CONTRACT.filter((d) => d.source === 'dictate')).toHaveLength(34);
     expect(PINNED_CONTRACT.filter((d) => d.source === 'client-added')).toHaveLength(8);
     // Every dictate key appears exactly once.
     const dictateKeys = PINNED_CONTRACT.filter((d) => d.source === 'dictate').map((d) => d.key);
-    expect(new Set(dictateKeys).size).toBe(28);
+    expect(new Set(dictateKeys).size).toBe(34);
     expect([...dictateKeys].sort()).toEqual([...FIELD_KEYS].sort());
   });
 
-  it('classifies 19 client-reportable, 15 photo-observed, and 2 stylist-supplied keys', () => {
+  it('classifies 19 client-reportable, 18 photo-observed, and 5 stylist-supplied keys', () => {
     expect(PINNED_CONTRACT.filter((d) => d.reportableBy === 'client')).toHaveLength(19);
-    expect(PINNED_CONTRACT.filter((d) => d.reportableBy === 'stylist')).toHaveLength(2);
-    expect(PINNED_CONTRACT.filter((d) => d.reportableBy === 'photo')).toHaveLength(15);
+    expect(PINNED_CONTRACT.filter((d) => d.reportableBy === 'stylist')).toHaveLength(5);
+    expect(PINNED_CONTRACT.filter((d) => d.reportableBy === 'photo')).toHaveLength(18);
     expect(PINNED_MAP.get('condition.grayPercent')?.reportableBy).toBe('photo');
     expect(PINNED_MAP.get('greyCoverageNeed')?.reportableBy).toBe('client');
     expect(PINNED_MAP.get('condition.previousLightener')?.reportableBy).toBe('client');

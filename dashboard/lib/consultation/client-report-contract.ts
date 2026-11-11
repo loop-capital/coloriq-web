@@ -17,6 +17,17 @@
  *   - DROPPED: none. All 28 dictate keys are accounted for below.
  *   - MERGED: none. Dotted keys (condition.*) are kept as-is so the contract
  *     stays compatible with the dictate tool and the wizard fd state.
+ *
+ * -- 34-KEY UPDATE (merge night, 2026-11-10) --
+ * The connector spike (Tiche-requested, Oct 7) added 6 dictate keys to
+ * FIELD_SCHEMA after the reconciliation: condition.breakage, condition.baldPatches,
+ * condition.scalpIrritation, medicalHistory.medications, medicalHistory.surgeries,
+ * medicalHistory.notes. The contract now pins 42 keys (34 dictate + 8 client-added).
+ * The 3 condition flags are photo-observed, like every other condition.* flag;
+ * the 3 medical-history fields are stylist-supplied (recorded by the stylist at
+ * the chair, never interpreted; the client-report form does not ask for medical
+ * history beyond allergies/sensitivities). The client-reportable set is unchanged
+ * at 19 — the approved questionnaire is unaffected.
  *   - ADDED: 8 client-only keys (source 'client-added'). Each traces to a
  *     design group that has no dictate key: the dictate schema captures
  *     structured observations, not the client's own words, stated needs,
@@ -43,9 +54,9 @@
  *   note's drop-and-log proposal, which would hide invalid submissions).
  * reportableBy 'photo': observed values that come ONLY from the chair photo
  *   (design exclusion). A client payload containing one is refused.
- * reportableBy 'stylist': values the stylist supplies at review/confirm.
- *   (No dictate key is classified 'stylist' today; the class exists so the
- *   merge validator can distinguish merge-time keys from client keys.)
+ * reportableBy 'stylist': values the stylist supplies at review/confirm —
+ *   brand/line (Jason ruling 2026-11-10: clients do not choose them) and the
+ *   medical-history fields (recorded by the stylist, never interpreted).
  * Client-reported data is NEVER auto-merged: it lands PENDING and becomes
  * part of a consultation record only when the stylist confirms it. Conflicts
  * are surfaced, never silently resolved — the confirm endpoint refuses to
@@ -148,6 +159,12 @@ const DICTATE_CLASS: Record<string, { reportableBy: ReportableBy; group: Contrac
   'condition.overAshy': { reportableBy: 'photo', group: 'observed' },
   'condition.colorGrab': { reportableBy: 'photo', group: 'observed' },
   'condition.hollowEnds': { reportableBy: 'photo', group: 'observed' },
+  'condition.breakage': { reportableBy: 'photo', group: 'observed', note: 'Observed condition flag; the client states the subjective experience via conditionNotes (Q5), never the flag.' },
+  'condition.baldPatches': { reportableBy: 'photo', group: 'observed', note: 'Observed condition flag; the client states the subjective experience via conditionNotes (Q5), never the flag.' },
+  'condition.scalpIrritation': { reportableBy: 'photo', group: 'observed', note: 'Observed condition flag; the client states the subjective experience via conditionNotes (Q5), never the flag.' },
+  'medicalHistory.medications': { reportableBy: 'stylist', group: 'history', note: 'Tiche-requested dictate field (connector spike); recorded by the stylist at the chair, never interpreted. The client-report form does not ask for medical history beyond allergies/sensitivities.' },
+  'medicalHistory.surgeries': { reportableBy: 'stylist', group: 'history', note: 'Tiche-requested dictate field (connector spike); recorded by the stylist at the chair, never interpreted. The client-report form does not ask for medical history beyond allergies/sensitivities.' },
+  'medicalHistory.notes': { reportableBy: 'stylist', group: 'history', note: 'Tiche-requested dictate field (connector spike); recorded by the stylist at the chair, never interpreted. The client-report form does not ask for medical history beyond allergies/sensitivities.' },
   brandPreference: { reportableBy: 'stylist', group: 'preferences', note: 'Jason ruling 2026-11-10: clients do not choose the brand; the stylist does. Most salons carry one to two lines.' },
   linePreference: { reportableBy: 'stylist', group: 'preferences', note: 'Jason ruling 2026-11-10: clients do not choose the line; the stylist does.' },
 };
@@ -205,6 +222,7 @@ const CLIENT_ADDED_FIELDS: PinnedFieldDef[] = [
 export const PINNED_CONTRACT: PinnedFieldDef[] = [
   ...FIELD_SCHEMA.map((def) => {
     const c = DICTATE_CLASS[def.key];
+    if (!c) throw new Error(`client-report contract: dictate key "${def.key}" has no DICTATE_CLASS entry — classify it before it can ship`);
     return {
       key: def.key,
       label: def.label,
