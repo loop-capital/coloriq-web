@@ -1634,6 +1634,34 @@ model transformations {
   @@index([formulation_id], map: "idx_transformations_formulation")
 }
 
+// GAP-1 consent set (Phase 1 item 4): split (a) service / (b) featuring
+// consent records. appointment_id is an opaque per-appointment scope key:
+// the repo has no appointments table, so no foreign key is declared.
+// wording_version is the id of the Gideon-cleared (b) wording version a
+// featuring record was captured against; NULL means captured against
+// uncleared wording and can never satisfy the push-time check.
+// revoked_at set = immediately excluded from every pool and push.
+model consent_records {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  appointment_id  String    @db.VarChar(100)
+  kind            String    @db.VarChar(20)
+  source          String    @db.VarChar(20)
+  method          String    @db.VarChar(20)
+  attested_by     String    @db.VarChar(255)
+  attested_at     DateTime  @db.Timestamp(6)
+  wording_version String?   @db.VarChar(100)
+  note            String?
+  stylist_id      String?   @db.Uuid
+  client_id       String?   @db.Uuid
+  revoked_at      DateTime? @db.Timestamp(6)
+  revoked_by      String?   @db.VarChar(255)
+  created_at      DateTime  @default(now()) @db.Timestamp(6)
+  updated_at      DateTime  @default(now()) @db.Timestamp(6)
+
+  @@index([appointment_id, kind], map: "idx_consent_records_appointment_kind")
+  @@index([appointment_id], map: "idx_consent_records_appointment")
+}
+
 /// Client patch test records — safety/compliance tracking for color services.
 /// A current (non-expired) passing test is required before applying oxidative color.
 model client_patch_tests {
