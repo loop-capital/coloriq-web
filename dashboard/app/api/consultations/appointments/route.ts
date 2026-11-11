@@ -24,6 +24,10 @@ const createSchema = z.object({
   scheduledAt: z
     .string()
     .refine((s) => !Number.isNaN(Date.parse(s)), 'scheduledAt must be an ISO date string'),
+  // Brand/line the stylist selects at creation (Jason ruling 2026-11-10).
+  // Optional: appointments created before this field existed have none.
+  brand: z.string().min(1).max(100).optional(),
+  line: z.string().min(1).max(100).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -56,6 +60,8 @@ export async function POST(request: NextRequest) {
       stylistId: authUser.userId,
       clientId: parsed.data.clientId,
       scheduledAt: new Date(parsed.data.scheduledAt),
+      brand: parsed.data.brand ?? null,
+      line: parsed.data.line ?? null,
       status: 'scheduled',
     },
   });

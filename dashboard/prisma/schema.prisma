@@ -1772,6 +1772,8 @@ model consultation_appointments {
   stylistId   String   @db.Uuid
   clientId    String   @db.Uuid
   scheduledAt DateTime @db.Timestamp(6)
+  brand       String?  @db.VarChar(100)
+  line        String?  @db.VarChar(100)
   status      String   @default("scheduled") @db.VarChar(20)
   createdAt   DateTime @default(now()) @db.Timestamp(6)
   updatedAt   DateTime @default(now()) @db.Timestamp(6)
