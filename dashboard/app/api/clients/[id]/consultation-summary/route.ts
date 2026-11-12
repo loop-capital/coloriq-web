@@ -1,5 +1,5 @@
 /**
- * GET /api/clients/[clientId]/consultation-summary — profile-summary feed.
+ * GET /api/clients/[id]/consultation-summary — profile-summary feed.
  *
  * Repeat-letter seam 1 (beta plan §5.1): the cadence job pulls the client's
  * latest stylist-CONFIRMED consultation record per client — to fill the
@@ -24,9 +24,9 @@ import { buildClientSummary } from '@/lib/consultation/client-summary';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ clientId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { clientId } = await params;
+  const { id: clientId } = await params;
   const authUser = await getUserFromRequest(request);
   if (!authUser) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
