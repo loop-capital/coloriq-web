@@ -38,11 +38,11 @@ import {
   ArrowLeft,
 } from 'lucide-react-native';
 import { useAcaiaScale, useAcaiaCapture } from '../hooks/useAcaiaScale';
-import { getAuthToken, notifyUnauthorized } from '../api/client';
+import { API_BASE as API_ROOT, getAuthToken, notifyUnauthorized } from '../api/client';
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 
-const API_BASE = 'https://colorgenius.co/api/v1/color-bar';
+const API_BASE = `${API_ROOT}/v1/color-bar`;
 
 const COLORS = {
   bg: '#0F0F1A',
@@ -1009,7 +1009,7 @@ export default function ColorBarScreen({ navigation, route }: any) {
                   <Text style={styles.pairingSubtitle}>
                     {pairingStatus === 'claimed'
                       ? 'Phone linked — generating formula...'
-                      : 'Enter this code on your phone in the COLORgenius app'}
+                      : 'Enter this code on your phone in the COLORiq app'}
                   </Text>
                   <ActivityIndicator color={COLORS.purple} style={{ marginTop: 16 }} />
                 </>

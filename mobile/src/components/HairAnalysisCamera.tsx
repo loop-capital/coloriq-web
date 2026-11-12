@@ -14,7 +14,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Camera, AlertCircle, X, CheckCircle } from 'lucide-react-native';
 
 // ─── The Analysis Prompt ─────────────────────────────────────────────────────
-const ANALYSIS_PROMPT = `You are COLORgenius — a professional hair color analysis AI used by licensed stylists.
+const ANALYSIS_PROMPT = `You are COLORiq — a professional hair color analysis AI used by licensed stylists.
 
 Analyze this hair photo and respond with ONLY valid JSON (no markdown, no code fences, no extra text):
 
@@ -157,7 +157,7 @@ export default function HairAnalysisCamera({ onResult, onCancel }: Props) {
           <Camera size={64} color="#666" />
           <Text style={styles.permissionTitle}>Camera Access Required</Text>
           <Text style={styles.permissionDesc}>
-            COLORgenius needs your camera to analyze hair photos.
+            COLORiq needs your camera to analyze hair photos.
           </Text>
           <TouchableOpacity style={styles.primaryButton} onPress={requestPermission}>
             <Text style={styles.primaryButtonText}>Grant Camera Access</Text>

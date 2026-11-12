@@ -27,7 +27,7 @@ export default function CertificationScreen({ navigation }: any) {
         <View style={styles.header}>
           <Award size={32} color={COLORS.purple} />
           <Text style={styles.title}>Certification</Text>
-          <Text style={styles.subtitle}>ColorGenius certification program</Text>
+          <Text style={styles.subtitle}>COLORiq certification program</Text>
         </View>
 
         <TouchableOpacity style={styles.card} onPress={() => Alert.alert('Coming Soon', 'Level 1 Foundations — coming in next update!')}>

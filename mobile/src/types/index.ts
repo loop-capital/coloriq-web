@@ -1,6 +1,6 @@
 // ============================================================
-// COLORgenius Mobile — TypeScript Types
-// Matching the web API at colorgenius.co
+// COLORiq Mobile — TypeScript Types
+// Matching the COLORiq web API
 // ============================================================
 
 // --- Hair Levels & Tones ---

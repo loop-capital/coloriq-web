@@ -71,7 +71,7 @@ export default function HomeScreen({ navigation }: any) {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Welcome to</Text>
-            <Text style={styles.title}>COLORgenius</Text>
+            <Text style={styles.title}>COLORiq</Text>
           </View>
           <View style={[styles.statusBadge, apiStatus === 'connected' ? styles.statusOnline : styles.statusOffline]}>
             <View style={[styles.statusDot, apiStatus === 'connected' ? styles.dotOnline : styles.dotOffline]} />

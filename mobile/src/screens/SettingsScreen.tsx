@@ -161,7 +161,7 @@ export default function SettingsScreen() {
         {/* Profile */}
         <TouchableOpacity style={styles.profileCard} onPress={() => Alert.alert('Coming Soon', 'Profile detail — coming in next update!')}>
           <View style={styles.profileAvatar}>
-            <Text style={styles.profileAvatarText}>CG</Text>
+            <Text style={styles.profileAvatarText}>IQ</Text>
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>Stylist</Text>
@@ -277,7 +277,7 @@ export default function SettingsScreen() {
           />
         </View>
 
-        <Text style={styles.version}>COLORgenius Mobile v1.0.1</Text>
+        <Text style={styles.version}>COLORiq Mobile v1.0.1</Text>
         <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>

@@ -2,8 +2,12 @@ import {
   TONE_VALUE_MAP,
 } from '../types';
 
-// COLORgenius API Client
-// Connects to the existing web API at colorgenius.co
+// COLORiq API Client
+// Connects to the COLORiq web API.
+// API host intentionally still the legacy colorgenius.co origin: it serves the
+// same deployment as getcoloriq.co, but getcoloriq.co is fronted by Cloudflare
+// and has not been verified for native (non-browser) API clients. Switch only
+// after verifying login + API calls against getcoloriq.co from a device build.
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

@@ -338,7 +338,7 @@ export default function GalleryUploadScreen({ navigation }: any) {
             <Camera size={64} color={COLORS.purple} />
             <Text style={styles.permissionTitle}>Camera Access Needed</Text>
             <Text style={styles.permissionText}>
-              COLORgenius needs camera access to capture hair photos.
+              COLORiq needs camera access to capture hair photos.
             </Text>
             <TouchableOpacity style={styles.permissionBtn} onPress={requestPermission}>
               <Text style={styles.permissionBtnText}>Grant Permission</Text>

@@ -65,9 +65,9 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           {/* Logo / Title */}
           <View style={styles.header}>
             <View style={styles.logoCircle}>
-              <Text style={styles.logoText}>CG</Text>
+              <Text style={styles.logoText}>IQ</Text>
             </View>
-            <Text style={styles.title}>COLORgenius</Text>
+            <Text style={styles.title}>COLORiq</Text>
             <Text style={styles.subtitle}>AI Hair Color Formulation</Text>
           </View>
 
@@ -122,11 +122,6 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             ) : (
               <Text style={styles.loginBtnText}>Sign In</Text>
             )}
-          </TouchableOpacity>
-
-          {/* Divider */}
-          <View style={styles.divider}>
-          </View>
           </TouchableOpacity>
 
         </View>

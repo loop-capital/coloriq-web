@@ -85,7 +85,7 @@ export default function AnalyzeScreen({ navigation }: any) {
   const pickFromGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Needed', 'COLORgenius needs access to your photos to upload hair analysis images.');
+      Alert.alert('Permission Needed', 'COLORiq needs access to your photos to upload hair analysis images.');
       return;
     }
 

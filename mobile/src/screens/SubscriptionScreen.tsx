@@ -28,7 +28,7 @@ export default function SubscriptionScreen({ navigation }: any) {
         <View style={styles.header}>
           <CreditCard size={32} color={COLORS.purple} />
           <Text style={styles.title}>Subscription</Text>
-          <Text style={styles.subtitle}>Manage your ColorGenius plan</Text>
+          <Text style={styles.subtitle}>Manage your COLORiq plan</Text>
         </View>
 
         <View style={styles.currentPlan}>

@@ -173,9 +173,9 @@ export default function SidebarDrawer({
         {/* Logo Header */}
         <View style={styles.logoSection}>
           <View style={styles.logoBadge}>
-            <Text style={styles.logoText}>CG</Text>
+            <Text style={styles.logoText}>IQ</Text>
           </View>
-          <Text style={styles.logoTitle}>ColorGenius</Text>
+          <Text style={styles.logoTitle}>COLORiq</Text>
         </View>
 
         <ScrollView

@@ -1,6 +1,6 @@
 // ============================================================
 // FormulateScreen — 6-Step Hair Color Formulation
-// Mobile version matching the web dashboard at colorgenius.co
+// Mobile version matching the COLORiq web dashboard
 // ============================================================
 
 import React, { useState, useCallback } from 'react';
@@ -1597,7 +1597,7 @@ export default function FormulateScreen({ navigation, route }: any) {
                 <View style={stepStyles.codeDisplay}>
                   <Text style={stepStyles.codeLabel}>Session Code</Text>
                   <Text style={stepStyles.codeValue}>{sessionCode}</Text>
-                  <Text style={stepStyles.codeUrl}>→ colorgenius.co/c</Text>
+                  <Text style={stepStyles.codeUrl}>→ getcoloriq.co/c</Text>
                   <Text style={stepStyles.codeInstructions}>
                     Share this code with your phone. They'll enter it at the URL above.
                   </Text>

@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "COLORgenius",
+    "name": "COLORiq",
     "slug": "colorgenius",
+    "scheme": "coloriq",
     "owner": "jasonopland",
     "version": "1.0.1",
     "orientation": "portrait",
@@ -15,21 +16,24 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.colorgenius.app",
+      "bundleIdentifier": "com.coloriq.app",
       "buildNumber": "4",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSCameraUsageDescription": "COLORgenius uses your camera to capture hair photos for AI color analysis.",
-        "NSPhotoLibraryUsageDescription": "COLORgenius accesses your photo library so you can upload hair photos for AI color analysis.",
-        "NSBluetoothAlwaysUsageDescription": "COLORgenius uses Bluetooth to connect to the Acaia Pearl scale for precise color formula measurements.",
-        "NSBluetoothPeripheralUsageDescription": "COLORgenius uses Bluetooth to discover and connect to the Acaia Pearl scale."
+        "NSCameraUsageDescription": "COLORiq uses your camera to capture hair photos for AI color analysis.",
+        "NSPhotoLibraryUsageDescription": "COLORiq accesses your photo library so you can upload hair photos for AI color analysis.",
+        "NSBluetoothAlwaysUsageDescription": "COLORiq uses Bluetooth to connect to the Acaia Pearl scale for precise color formula measurements.",
+        "NSBluetoothPeripheralUsageDescription": "COLORiq uses Bluetooth to discover and connect to the Acaia Pearl scale."
       },
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "associatedDomains": [
+        "applinks:getcoloriq.co"
+      ]
     },
     "android": {
-      "package": "com.colorgenius.app",
+      "package": "com.coloriq.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -58,13 +62,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow COLORgenius to access your camera to capture hair photos for analysis."
+          "cameraPermission": "Allow COLORiq to access your camera to capture hair photos for analysis."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "COLORgenius accesses your photo library so you can upload hair photos for AI color analysis."
+          "photosPermission": "COLORiq accesses your photo library so you can upload hair photos for AI color analysis."
         }
       ],
       [
@@ -72,7 +76,7 @@
         {
           "isBackgroundEnabled": true,
           "neverForLocation": true,
-          "bluetoothAlwaysPermission": "COLORgenius uses Bluetooth to connect to the Acaia Pearl scale for precise color formula measurements."
+          "bluetoothAlwaysPermission": "COLORiq uses Bluetooth to connect to the Acaia Pearl scale for precise color formula measurements."
         }
       ]
     ]

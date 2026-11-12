@@ -95,9 +95,9 @@ function CustomHeader() {
           <Menu size={22} color={THEME.textSecondary} />
         </TouchableOpacity>
         <View style={styles.logoBadge}>
-          <Text style={styles.logoText}>CG</Text>
+          <Text style={styles.logoText}>IQ</Text>
         </View>
-        <Text style={styles.headerTitle}>ColorGenius</Text>
+        <Text style={styles.headerTitle}>COLORiq</Text>
       </View>
     </View>
   );
