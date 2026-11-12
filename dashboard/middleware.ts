@@ -59,6 +59,10 @@ const PUBLIC_API_EXACT = [
   '/api/square/webhook',
   '/openapi.json',   // Muse connector: public API spec (Muse fetches this unauthenticated)
   '/llms.txt',       // Muse connector: public service description
+  // Entitlement-exempt but NOT unauthenticated: the route verifies the JWT
+  // itself. A lapsed subscriber must still be able to see their plan state
+  // and delete their account (Apple 5.1.1(v)).
+  '/api/account',
 ];
 
 // Integration routes with their own API-key auth (route-level, resolveStylist)

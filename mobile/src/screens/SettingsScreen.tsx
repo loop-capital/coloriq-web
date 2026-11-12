@@ -21,7 +21,7 @@ import {
   Wifi,
   Smartphone,
 } from 'lucide-react-native';
-import { clearAuthToken, getSettings, saveNotifications, saveAutoSync, getDefaultBrand } from '../api/client';
+import { getSettings, saveNotifications, saveAutoSync, getDefaultBrand, getAccount } from '../api/client';
 import { AuthContext } from '../../App';
 
 interface SettingRowProps {
@@ -78,7 +78,9 @@ function SectionHeader({ title }: { title: string }) {
   return <Text style={styles.sectionHeader}>{title}</Text>;
 }
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ navigation }: any) {
+  const [accountEmail, setAccountEmail] = useState<string | null>(null);
+  const [accountName, setAccountName] = useState<string | null>(null);
   const [notifications, setNotifications] = useState(true);
   const [autoSync, setAutoSync] = useState(true);
   const [defaultBrand, setDefaultBrand] = useState('Wella');
@@ -100,6 +102,13 @@ export default function SettingsScreen() {
         setLoadingSettings(false);
       }
     })();
+  }, []);
+
+  useEffect(() => {
+    // Non-fatal: the profile card falls back to generic text if this fails.
+    getAccount()
+      .then((a) => { setAccountEmail(a.account.email); setAccountName(a.account.name); })
+      .catch(() => {});
   }, []);
 
   const handleNotificationsToggle = async (value: boolean) => {
@@ -159,13 +168,13 @@ export default function SettingsScreen() {
 
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* Profile */}
-        <TouchableOpacity style={styles.profileCard} onPress={() => Alert.alert('Coming Soon', 'Profile detail — coming in next update!')}>
+        <TouchableOpacity style={styles.profileCard} onPress={() => navigation.navigate('Account')}>
           <View style={styles.profileAvatar}>
             <Text style={styles.profileAvatarText}>IQ</Text>
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>Stylist</Text>
-            <Text style={styles.profileEmail}>colorgenius.co</Text>
+            <Text style={styles.profileName}>{accountName || 'Stylist'}</Text>
+            <Text style={styles.profileEmail}>{accountEmail || 'Account & plan'}</Text>
           </View>
           <ChevronRight size={20} color="#71717A" />
         </TouchableOpacity>
@@ -176,8 +185,8 @@ export default function SettingsScreen() {
           <SettingRow
             icon={<User size={20} color="#9333EA" />}
             title="Account"
-            subtitle="Profile, email, password"
-            onPress={() => Alert.alert('Coming Soon', 'Account detail — coming in next update!')}
+            subtitle="Plan, delete account"
+            onPress={() => navigation.navigate('Account')}
           />
           <SettingRow
             icon={<Bell size={20} color="#F59E0B" />}

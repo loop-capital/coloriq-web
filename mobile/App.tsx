@@ -26,6 +26,7 @@ import PricingScreen from './src/screens/PricingScreen';
 import CertificationScreen from './src/screens/CertificationScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import SubscriptionScreen from './src/screens/SubscriptionScreen';
+import AccountScreen from './src/screens/AccountScreen';
 import CameraScreen from './src/screens/CameraScreen';
 
 import SidebarDrawer from './src/components/SidebarDrawer';
@@ -61,6 +62,7 @@ export type RootStackParamList = {
   Certification: undefined;
   Settings: undefined;
   Subscription: undefined;
+  Account: undefined;
   Camera: undefined;
   ColorBar: undefined;
 };
@@ -132,6 +134,7 @@ function WrappedPricing(props: any) { return <ScreenWithHeader><PricingScreen {.
 function WrappedCertification(props: any) { return <ScreenWithHeader><CertificationScreen {...props} /></ScreenWithHeader>; }
 function WrappedSettings(props: any) { return <ScreenWithHeader><SettingsScreen {...props} /></ScreenWithHeader>; }
 function WrappedSubscription(props: any) { return <ScreenWithHeader><SubscriptionScreen {...props} /></ScreenWithHeader>; }
+function WrappedAccount(props: any) { return <ScreenWithHeader><AccountScreen {...props} /></ScreenWithHeader>; }
 function WrappedColorBar(props: any) { return <ColorBarScreen {...props} />; }
 function WrappedCamera(props: any) { return <ScreenWithHeader><CameraScreen {...props} /></ScreenWithHeader>; }
 
@@ -226,6 +229,7 @@ function AppContent() {
         <Stack.Screen name="Certification" component={WrappedCertification} />
         <Stack.Screen name="Settings" component={WrappedSettings} />
         <Stack.Screen name="Subscription" component={WrappedSubscription} />
+        <Stack.Screen name="Account" component={WrappedAccount} />
         <Stack.Screen name="ColorBar" component={WrappedColorBar} />
         <Stack.Screen name="Camera" component={WrappedCamera} />
       </Stack.Navigator>

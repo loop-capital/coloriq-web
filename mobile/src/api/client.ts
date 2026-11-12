@@ -268,6 +268,43 @@ export async function loginWithCredentials(email: string, password: string): Pro
   }
 }
 
+// ─── Account ─────────────────────────────────────────────────────
+// Accounts are created and paid for on the web; the app signs in to an
+// activated account. GET/DELETE /api/account are entitlement-exempt on the
+// server so a lapsed subscriber can still see their state and delete.
+
+// Where plan changes happen (web). Also returned by GET /api/account.
+export const WEB_MANAGE_PLAN_URL = 'https://getcoloriq.co/get-access';
+
+export interface AccountPlan {
+  hasAccess: boolean;
+  tier: string | null;
+  label: string | null;
+  status: string | null;
+  scope: 'user' | 'stylist' | 'salon' | string | null;
+  currentPeriodEnd: string | null;
+}
+
+export interface AccountInfo {
+  account: { id: string; email: string; name: string | null; createdAt: string | null };
+  plan: AccountPlan;
+  manageUrl: string;
+}
+
+export async function getAccount(): Promise<AccountInfo> {
+  const res = await apiRequest<{ success: boolean; data: AccountInfo }>('/account');
+  return res.data;
+}
+
+/** Permanently deletes the signed-in account, then clears the local token. */
+export async function deleteAccount(): Promise<void> {
+  await apiRequest<{ success: boolean }>('/account', {
+    method: 'DELETE',
+    body: { confirm: 'DELETE' },
+  });
+  await clearAuthToken();
+}
+
 // ─── Photos ──────────────────────────────────────────────────────
 
 export interface PhotoUploadResponse {
