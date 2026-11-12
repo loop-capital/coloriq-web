@@ -22,8 +22,6 @@ import ColorBarScreen from './src/screens/ColorBarScreen';
 import ClientCollectionScreen from './src/screens/ClientCollectionScreen';
 import CommunityScreen from './src/screens/CommunityScreen';
 import InventoryScreen from './src/screens/InventoryScreen';
-import PricingScreen from './src/screens/PricingScreen';
-import CertificationScreen from './src/screens/CertificationScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import SubscriptionScreen from './src/screens/SubscriptionScreen';
 import AccountScreen from './src/screens/AccountScreen';
@@ -58,8 +56,6 @@ export type RootStackParamList = {
   ClientCollection: undefined;
   Community: undefined;
   Inventory: undefined;
-  Pricing: undefined;
-  Certification: undefined;
   Settings: undefined;
   Subscription: undefined;
   Account: undefined;
@@ -130,8 +126,6 @@ function WrappedClientDetail(props: any) { return <ScreenWithHeader><ClientDetai
 function WrappedClientCollection(props: any) { return <ScreenWithHeader><ClientCollectionScreen {...props} /></ScreenWithHeader>; }
 function WrappedCommunity(props: any) { return <ScreenWithHeader><CommunityScreen {...props} /></ScreenWithHeader>; }
 function WrappedInventory(props: any) { return <ScreenWithHeader><InventoryScreen {...props} /></ScreenWithHeader>; }
-function WrappedPricing(props: any) { return <ScreenWithHeader><PricingScreen {...props} /></ScreenWithHeader>; }
-function WrappedCertification(props: any) { return <ScreenWithHeader><CertificationScreen {...props} /></ScreenWithHeader>; }
 function WrappedSettings(props: any) { return <ScreenWithHeader><SettingsScreen {...props} /></ScreenWithHeader>; }
 function WrappedSubscription(props: any) { return <ScreenWithHeader><SubscriptionScreen {...props} /></ScreenWithHeader>; }
 function WrappedAccount(props: any) { return <ScreenWithHeader><AccountScreen {...props} /></ScreenWithHeader>; }
@@ -225,8 +219,6 @@ function AppContent() {
         <Stack.Screen name="ClientDetail" component={WrappedClientDetail} />
         <Stack.Screen name="Community" component={WrappedCommunity} />
         <Stack.Screen name="Inventory" component={WrappedInventory} />
-        <Stack.Screen name="Pricing" component={WrappedPricing} />
-        <Stack.Screen name="Certification" component={WrappedCertification} />
         <Stack.Screen name="Settings" component={WrappedSettings} />
         <Stack.Screen name="Subscription" component={WrappedSubscription} />
         <Stack.Screen name="Account" component={WrappedAccount} />

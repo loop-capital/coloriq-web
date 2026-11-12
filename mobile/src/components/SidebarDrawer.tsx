@@ -23,8 +23,6 @@ import {
   ImageIcon,
   MessageCircle,
   Package,
-  DollarSign,
-  Award,
   Settings,
   CreditCard,
   LogOut,
@@ -76,8 +74,6 @@ const navItems: NavItem[] = [
   { label: 'Gallery', icon: <ImageIcon size={18} color={COLORS.textSecondary} />, route: 'Gallery', group: 'KNOWLEDGE' },
   { label: 'Community', icon: <MessageCircle size={18} color={COLORS.textSecondary} />, route: 'Community', group: 'COMMUNITY' },
   { label: 'Inventory', icon: <Package size={18} color={COLORS.textSecondary} />, route: 'Inventory', group: 'BUSINESS' },
-  { label: 'Pricing Rules', icon: <DollarSign size={18} color={COLORS.textSecondary} />, route: 'Pricing', group: 'BUSINESS' },
-  { label: 'Certification', icon: <Award size={18} color={COLORS.textSecondary} />, route: 'Certification', group: 'BUSINESS' },
   { label: 'Settings', icon: <Settings size={18} color={COLORS.textSecondary} />, route: 'Settings', group: 'ACCOUNT' },
 ];
 

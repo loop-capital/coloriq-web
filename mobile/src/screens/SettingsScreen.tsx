@@ -7,21 +7,20 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   User,
   Bell,
-  Bluetooth,
-  Palette,
   Shield,
-  CircleHelp,
   LogOut,
   ChevronRight,
   Wifi,
-  Smartphone,
 } from 'lucide-react-native';
-import { getSettings, saveNotifications, saveAutoSync, getDefaultBrand, getAccount } from '../api/client';
+import { getSettings, saveNotifications, saveAutoSync, getAccount } from '../api/client';
+
+const PRIVACY_POLICY_URL = 'https://getcoloriq.co/privacy';
 import { AuthContext } from '../../App';
 
 interface SettingRowProps {
@@ -83,7 +82,6 @@ export default function SettingsScreen({ navigation }: any) {
   const [accountName, setAccountName] = useState<string | null>(null);
   const [notifications, setNotifications] = useState(true);
   const [autoSync, setAutoSync] = useState(true);
-  const [defaultBrand, setDefaultBrand] = useState('Wella');
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -93,8 +91,6 @@ export default function SettingsScreen({ navigation }: any) {
         const settings = await getSettings();
         setNotifications(settings.notifications);
         setAutoSync(settings.autoSync);
-        const brand = await getDefaultBrand();
-        if (brand) setDefaultBrand(brand);
       } catch (e) {
         console.error('Failed to load settings:', e);
         Alert.alert('Error', 'Failed to load settings');
@@ -142,6 +138,22 @@ export default function SettingsScreen({ navigation }: any) {
   };
 
   const { logout } = React.useContext(AuthContext);
+
+  const openPrivacyPolicy = async () => {
+    try {
+      await Linking.openURL(PRIVACY_POLICY_URL);
+    } catch {
+      Alert.alert('Unable to open browser', 'Visit getcoloriq.co/privacy to read our privacy policy.');
+    }
+  };
+
+  const openAppPermissions = async () => {
+    try {
+      await Linking.openSettings();
+    } catch {
+      Alert.alert('Unable to open Settings', 'Open the Settings app and select COLORiq to manage permissions.');
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -203,21 +215,9 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </View>
 
-        {/* Devices */}
-        <SectionHeader title="Devices & BLE" />
+        {/* Sync */}
+        <SectionHeader title="Sync" />
         <View style={styles.section}>
-          <SettingRow
-            icon={<Bluetooth size={20} color="#3B82F6" />}
-            title="Bluetooth Devices"
-            subtitle="Acaia scales, sensors"
-            onPress={() => Alert.alert('Coming Soon', 'Bluetooth devices — coming in next update!')}
-          />
-          <SettingRow
-            icon={<Smartphone size={20} color="#EC4899" />}
-            title="Connected Devices"
-            subtitle="Manage paired devices"
-            onPress={() => Alert.alert('Coming Soon', 'Connected devices — coming in next update!')}
-          />
           <SettingRow
             icon={<Wifi size={20} color="#10B981" />}
             title="Auto Sync"
@@ -233,46 +233,20 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </View>
 
-        {/* Formulation */}
-        <SectionHeader title="Formulation" />
-        <View style={styles.section}>
-          <SettingRow
-            icon={<Palette size={20} color="#EC4899" />}
-            title="Default Brand"
-            subtitle="Wella"
-            onPress={() => Alert.alert('Coming Soon', 'Default brand picker — coming in next update!')}
-          />
-          <SettingRow
-            icon={<Palette size={20} color="#F97316" />}
-            title="Shade Database"
-            subtitle="3,454 shades - 21 brands"
-            onPress={() => Alert.alert('Coming Soon', 'Shade database browser — coming in next update!')}
-          />
-        </View>
-
-        {/* Security */}
-        <SectionHeader title="Security" />
+        {/* Privacy */}
+        <SectionHeader title="Privacy & Permissions" />
         <View style={styles.section}>
           <SettingRow
             icon={<Shield size={20} color="#14B8A6" />}
-            title="Privacy & Data"
-            onPress={() => Alert.alert('Coming Soon', 'Privacy settings — coming in next update!')}
+            title="Privacy Policy"
+            subtitle="getcoloriq.co/privacy"
+            onPress={openPrivacyPolicy}
           />
           <SettingRow
             icon={<Shield size={20} color="#06B6D4" />}
             title="App Permissions"
-            onPress={() => Alert.alert('Coming Soon', 'App permissions — coming in next update!')}
-          />
-        </View>
-
-        {/* Support */}
-        <SectionHeader title="Support" />
-        <View style={styles.section}>
-          <SettingRow
-            icon={<CircleHelp size={20} color="#71717A" />}
-            title="Help Center"
-            subtitle="colorgenius.co/help"
-            onPress={() => Alert.alert('Coming Soon', 'Help center — coming in next update!')}
+            subtitle="Camera, photos, Bluetooth"
+            onPress={openAppPermissions}
           />
         </View>
 

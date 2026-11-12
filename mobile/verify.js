@@ -2,10 +2,10 @@
 const fs = require('fs');
 const screens = fs.readdirSync('src/screens').filter(f => f.endsWith('.tsx'));
 const expected = [
-  'AnalyzeScreen.tsx', 'CameraScreen.tsx', 'CertificationScreen.tsx', 
+  'AnalyzeScreen.tsx', 'CameraScreen.tsx', 
   'ClientsScreen.tsx', 'CommunityScreen.tsx', 'DashboardScreen.tsx',
   'FormulateScreen.tsx', 'GalleryScreen.tsx', 'HistoryScreen.tsx',
-  'InventoryScreen.tsx', 'LibraryScreen.tsx', 'PricingScreen.tsx',
+  'InventoryScreen.tsx', 'LibraryScreen.tsx',
   'QuestionnaireScreen.tsx', 'ServiceScreen.tsx', 'SettingsScreen.tsx',
   'SubscriptionScreen.tsx'
 ];

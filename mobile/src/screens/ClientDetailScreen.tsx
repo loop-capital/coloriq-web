@@ -18,7 +18,6 @@ import {
   Phone,
   Calendar,
   FlaskConical,
-  Camera,
   User,
   Heart,
   ClipboardList,
@@ -181,27 +180,6 @@ export default function ClientDetailScreen({ navigation, route }: ClientDetailSc
               <Text style={styles.notesText}>{client.notes}</Text>
             </View>
           )}
-        </View>
-
-        {/* Photo Gallery */}
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionHeader}>
-            <Camera size={18} color="#9333EA" />
-            <Text style={styles.sectionTitle}>Photo Gallery</Text>
-          </View>
-          <View style={styles.photoGrid}>
-            {[1, 2, 3, 4].map((i) => (
-              <TouchableOpacity
-                key={i}
-                style={styles.photoPlaceholder}
-                onPress={() => Alert.alert('Coming Soon', 'Photo upload will be available in the next update!')}
-              >
-                <Camera size={24} color="#71717A" />
-                <Text style={styles.photoLabel}>{i <= 2 ? 'Before' : 'After'} {i <= 2 ? i : i - 2}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <Text style={styles.photoHint}>Tap to upload before & after photos</Text>
         </View>
 
         {/* Formulation History */}
@@ -382,24 +360,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: { fontSize: 15, fontWeight: '600', color: '#F5F5F7', flex: 1 },
-  photoGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  photoPlaceholder: {
-    width: '48%',
-    aspectRatio: 1,
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 4,
-  },
-  photoLabel: { fontSize: 11, color: '#71717A' },
-  photoHint: { fontSize: 12, color: '#71717A', textAlign: 'center', marginTop: 12 },
   formulaList: { gap: 10 },
   formulaCard: {
     backgroundColor: 'rgba(255,255,255,0.03)',
