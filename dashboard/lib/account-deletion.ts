@@ -48,14 +48,16 @@
  * PAYOUT NOTE: the marketplace 70/30 ledger keys off
  * formula_listings.creator_id, NOT off formulas/formula_photos
  * stylist_id — nulling those does not by itself redirect creator payouts.
- * The listings still point at the anonymized stylist row, so the 70%
- * keeps accruing to that (dead) creator id in the monthly billing run.
+ * So this function reassigns the deleting stylist's listings to the
+ * COLORiq house creator (HOUSE_CREATOR_ID, migration
+ * 20261113_add_coloriq_house_creator): future usage on those listings
+ * accrues its 70% to COLORiq (Jason's ruling, 2026-11-12; Sienna's
+ * disposition, option (a)). Past usage-log rows are untouched — history
+ * is not rewritten. The reassignment runs inside this transaction and
+ * fails the deletion if the house creator row is missing (fail closed:
+ * never leave a listing pointing at the anonymized stylist row).
  * No payout settlement exists yet (see billing.ts TODO), so no money
- * moves today — but making the forfeiture true at the money layer needs
- * a follow-up decision: reassign the listings to a COLORiq house creator,
- * deactivate them, or teach billing to treat deactivated creators as
- * platform revenue. Do not claim the revenue is COLORiq's until one of
- * those lands.
+ * moves today — but the ledger attribution is now COLORiq's.
  *
  * SUBSCRIPTION ROWS: user- and stylist-level rows are marked canceled
  * (reason 'account_deleted'). Salon-level rows are untouched — a salon can
@@ -73,6 +75,17 @@ import { cancelSquareSubscriptionIfActive, getSquareSubscription, isSquareNotFou
 type Db = typeof defaultPrisma;
 
 export const DELETED_EMAIL_DOMAIN = 'deleted.coloriq.invalid';
+
+/**
+ * COLORiq house creator — the stylists row that receives a deleting
+ * stylist's marketplace listings (migration
+ * 20261113_add_coloriq_house_creator; row id below, email
+ * house-creator@coloriq.invalid, handle 'coloriq'). It has no login user
+ * and an unusable password hash, so it can never sign in. The id is
+ * stable — do not change it; the migration and this constant must agree.
+ */
+export const HOUSE_CREATOR_ID = '258e3f0b-9963-4178-a4c2-6b5dfeefcc04';
+export const HOUSE_CREATOR_EMAIL = 'house-creator@coloriq.invalid';
 
 export interface DeletionResult {
   deleted: true;
@@ -190,6 +203,23 @@ export async function deleteAccount(userId: string, db: Db = defaultPrisma): Pro
       // and any future revenue they generate. Same pattern as formulas.
       await tx.formula_photos.updateMany({ where: { stylist_id: sid }, data: { stylist_id: null } });
       await tx.photo_analyses.updateMany({ where: { stylist_id: sid }, data: { stylist_id: null } });
+      // REASSIGNED TO THE HOUSE CREATOR (Jason's ruling, 2026-11-12;
+      // Sienna's disposition, option (a)): the listings keep accruing
+      // their 70% — now to COLORiq. The house row must exist (migration
+      // 20261113_add_coloriq_house_creator); if it is missing the
+      // deletion aborts instead of stranding revenue with the dead
+      // creator id. Past usage-log rows are untouched.
+      const house = await tx.stylists.findUnique({ where: { id: HOUSE_CREATOR_ID }, select: { id: true } });
+      if (!house) {
+        throw new Error(
+          `COLORiq house creator ${HOUSE_CREATOR_ID} is missing — migration 20261113_add_coloriq_house_creator has not been applied`,
+        );
+      }
+      const reassigned = await tx.formula_listings.updateMany({
+        where: { creator_id: sid },
+        data: { creator_id: HOUSE_CREATOR_ID },
+      });
+      console.log(`[account-deletion] reassigned ${reassigned.count} marketplace listings to the COLORiq house creator for user ${userId}`);
       await tx.api_keys.deleteMany({
         where: { OR: [{ created_by: sid }, { owner_type: 'stylist', owner_id: sid }] },
       });

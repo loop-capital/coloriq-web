@@ -156,7 +156,7 @@ export default function AccountScreen({ navigation }: any) {
                   Records that belong to your salon (its clients, inventory, billing, and formulas used in
                   client visits) are kept for the salon and are no longer linked to you.
                 </Text>
-                <Text style={styles.bullet}>• Your formulas, photos and photo analyses stay with COLORiq and are no longer linked to you. You give up any claim to future revenue from them.</Text>
+                <Text style={styles.bullet}>• Your formulas, photos and photo analyses stay with COLORiq and are no longer linked to you. Any future revenue from them belongs to COLORiq.</Text>
                 <Text style={styles.label}>Type {CONFIRM_WORD} to confirm</Text>
                 <TextInput
                   value={confirmText}

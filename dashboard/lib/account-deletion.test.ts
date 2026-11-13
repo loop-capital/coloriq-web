@@ -22,6 +22,7 @@ let state: {
   stylist: any;
   subs: any[];
   failOn?: string;
+  houseCreator: boolean;
 };
 
 function model(name: string) {
@@ -32,7 +33,11 @@ function model(name: string) {
       if (!state.user || args.where.id !== state.user.id) return null;
       return { ...state.user, stylist: state.stylist ? { id: state.stylist.id } : null };
     }
-    if (name === 'stylists' && op === 'findUnique') return state.stylist;
+    if (name === 'stylists' && op === 'findUnique') {
+      if (args.where?.user_id) return state.stylist;
+      if (args.where?.id === HOUSE_CREATOR_ID) return state.houseCreator === false ? null : { id: HOUSE_CREATOR_ID };
+      return null;
+    }
     if (name === 'subscriptions' && op === 'findFirst') {
       const ors = args.where.OR as Array<{ subscriber_type: string; subscriber_id: string }>;
       const rows = state.subs
@@ -58,7 +63,7 @@ function model(name: string) {
 const MODELS = [
   'users', 'stylists', 'subscriptions', 'formulas', 'formula_comments', 'formula_photo_comments',
   'trend_searches', 'webhooks', 'post_likes', 'post_comments', 'community_posts', 'transformations',
-  'formula_photos', 'photo_analyses', 'api_keys',
+  'formula_photos', 'photo_analyses', 'api_keys', 'formula_listings',
   'consent_records', 'consultation_appointments', 'consultation_records',
   'client_report_tokens', 'client_reports',
 ];
@@ -85,7 +90,7 @@ jest.mock('@/lib/square', () => ({
   isSquareNotFound: (err: any) => err?.statusCode === 404,
 }));
 
-import { deleteAccount, getAccountPlanState, planLabel, DELETED_EMAIL_DOMAIN } from './account-deletion';
+import { deleteAccount, getAccountPlanState, planLabel, DELETED_EMAIL_DOMAIN, HOUSE_CREATOR_ID, HOUSE_CREATOR_EMAIL } from './account-deletion';
 import { GET, DELETE } from '../app/api/account/route';
 
 const USER = { id: 'u-1', email: 'ana@salon.test', first_name: 'Ana', last_name: 'Ray', salon_id: 'salon-1', created_at: new Date('2026-01-01') };
@@ -103,7 +108,7 @@ const ops = (m: string, op?: string) => calls.filter((c) => c.model === m && (!o
 
 beforeEach(() => {
   calls = [];
-  state = { user: { ...USER }, stylist: { ...STYLIST }, subs: [] };
+  state = { user: { ...USER }, stylist: { ...STYLIST }, subs: [], houseCreator: true };
   mockGetUserFromRequest.mockReset();
   mockGetUserFromRequest.mockImplementation(async () => null);
   mockClearAuthCookie.mockClear();
@@ -180,6 +185,43 @@ describe('deleteAccount', () => {
     expect(ops('photo_analyses', 'updateMany')[0].args).toEqual({
       where: { stylist_id: 's-1' }, data: { stylist_id: null },
     });
+  });
+
+  it('reassigns marketplace listings to the COLORiq house creator', async () => {
+    await deleteAccount('u-1', mockPrisma);
+    // The house creator row is verified to exist first — a deletion must
+    // never strand a listing pointing at the anonymized stylist row.
+    const houseCheck = ops('stylists', 'findUnique').filter((c) => c.args.where.id === HOUSE_CREATOR_ID);
+    expect(houseCheck).toHaveLength(1);
+    expect(houseCheck[0].args).toEqual({ where: { id: HOUSE_CREATOR_ID }, select: { id: true } });
+    // Listings are reassigned, never deleted — past usage-log rows keep
+    // their recorded creator; only future accrual changes.
+    expect(ops('formula_listings', 'deleteMany')).toEqual([]);
+    expect(ops('formula_listings', 'delete')).toEqual([]);
+    expect(ops('formula_listings', 'updateMany')).toHaveLength(1);
+    expect(ops('formula_listings', 'updateMany')[0].args).toEqual({
+      where: { creator_id: 's-1' },
+      data: { creator_id: HOUSE_CREATOR_ID },
+    });
+    // The house creator id is a real, stable UUID (the production row
+    // seeded by migration 20261113_add_coloriq_house_creator).
+    expect(HOUSE_CREATOR_ID).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    expect(HOUSE_CREATOR_EMAIL).toBe('house-creator@coloriq.invalid');
+  });
+
+  it('aborts the deletion when the house creator row is missing — nothing is deleted', async () => {
+    state.houseCreator = false;
+    await expect(deleteAccount('u-1', mockPrisma)).rejects.toThrow(/house creator/);
+    expect(ops('users', 'delete')).toEqual([]);
+    expect(ops('formula_listings', 'updateMany')).toEqual([]);
+  });
+
+  it('touches no listings for a user with no stylist profile', async () => {
+    state.stylist = null;
+    const res = await deleteAccount('u-1', mockPrisma);
+    expect(res).toEqual({ deleted: true, stylistAnonymized: false });
+    expect(ops('formula_listings')).toEqual([]);
+    expect(ops('stylists', 'findUnique').filter((c) => c.args.where.id === HOUSE_CREATOR_ID)).toEqual([]);
   });
 
   it('detaches consultation history with typed updateMany and never deletes it', async () => {
