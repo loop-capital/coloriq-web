@@ -76,6 +76,29 @@ export async function cancelSquareSubscription(subscriptionId: string) {
   return response.subscription;
 }
 
+// ── Get Subscription ──
+export async function getSquareSubscription(subscriptionId: string) {
+  const response = await squareClient.subscriptions.get({ subscriptionId });
+  return response.subscription;
+}
+
+// ── Cancel Subscription (tolerant) ──
+// Cancel, tolerating a subscription that is already dead at Square: Square
+// errors on canceling a CANCELED subscription, so on error we re-fetch —
+// a CANCELED / DEACTIVATED / COMPLETED subscription, or one Square no
+// longer knows, is not billing anyone and counts as done. Any other
+// failure rethrows: the caller must abort rather than leave billing live.
+export async function cancelSquareSubscriptionIfActive(subscriptionId: string): Promise<void> {
+  try {
+    await cancelSquareSubscription(subscriptionId);
+  } catch (err) {
+    const sub = await getSquareSubscription(subscriptionId).catch(() => null);
+    if (!sub) return;
+    if (sub.status === 'CANCELED' || sub.status === 'DEACTIVATED' || sub.status === 'COMPLETED') return;
+    throw err;
+  }
+}
+
 // ── Get Customer ──
 export async function getSquareCustomer(customerId: string) {
   const response = await squareClient.customers.get({ customerId });

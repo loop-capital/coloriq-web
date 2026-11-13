@@ -3,9 +3,13 @@
  * GET/DELETE handlers in app/api/account/route.ts against a fake prisma.
  *
  * No live database here: the fake records every call so the tests assert
- * exactly which rows are deleted, which are anonymized, and which are left
- * alone. FK behavior / transaction rollback is the DB's job and is not
- * simulated beyond "an error inside the transaction rejects the call".
+ * exactly which rows are deleted, which are anonymized, which are
+ * detached, and which are left alone. FK behavior / transaction rollback
+ * is the DB's job and is not simulated beyond "an error inside the
+ * transaction rejects the call". The Square client is mocked (no network):
+ * cancelSquareSubscriptionIfActive records its calls and can be made to
+ * throw. The Nov 10 consultation tables are not Prisma models, so their
+ * detach runs through $executeRaw, which the fake records as SQL + values.
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
@@ -36,6 +40,14 @@ function model(name: string) {
         .sort((a, b) => b.created_at.getTime() - a.created_at.getTime());
       return rows[0] ?? null;
     }
+    if (name === 'subscriptions' && op === 'findMany') {
+      const ors = args.where.OR as Array<{ subscriber_type: string; subscriber_id: string }>;
+      return state.subs
+        .filter((s) => ors.some((o) => o.subscriber_type === s.subscriber_type && o.subscriber_id === s.subscriber_id))
+        .filter((s) => !['canceled', 'revoked', 'expired'].includes(s.status))
+        .filter((s) => s.square_subscription_id != null)
+        .map((s) => ({ square_subscription_id: s.square_subscription_id }));
+    }
     if (op === 'deleteMany' || op === 'updateMany') return { count: 1 };
     return {};
   };
@@ -50,6 +62,12 @@ const MODELS = [
 
 const mockPrisma: any = Object.fromEntries(MODELS.map((m) => [m, model(m)]));
 mockPrisma.$transaction = async (fn: (tx: any) => Promise<any>) => fn(mockPrisma);
+mockPrisma.$executeRaw = async (strings: any, ...values: any[]) => {
+  const sql = Array.isArray(strings) ? strings.join('?') : String(strings);
+  calls.push({ model: '$executeRaw', op: 'raw', args: { sql, values } });
+  if (state.failOn === '$executeRaw.raw') throw new Error('boom $executeRaw.raw');
+  return 1;
+};
 
 jest.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
 const mockGetUserFromRequest = jest.fn(async (_req: any): Promise<any> => null);
@@ -57,6 +75,12 @@ const mockClearAuthCookie = jest.fn(async () => {});
 jest.mock('@/lib/auth', () => ({
   getUserFromRequest: (...a: any[]) => (mockGetUserFromRequest as any)(...a),
   clearAuthCookie: () => mockClearAuthCookie(),
+}));
+const mockCancelSquare = jest.fn(async (id: string) => {
+  calls.push({ model: 'square', op: 'cancel', args: { subscriptionId: id } });
+});
+jest.mock('@/lib/square', () => ({
+  cancelSquareSubscriptionIfActive: (...a: any[]) => (mockCancelSquare as any)(...a),
 }));
 
 import { deleteAccount, getAccountPlanState, planLabel, DELETED_EMAIL_DOMAIN } from './account-deletion';
@@ -68,7 +92,7 @@ const STYLIST = { id: 's-1' };
 function req(method: string, body?: unknown): any {
   return new Request('http://localhost/api/account', {
     method,
-    headers: { 'content-type': 'application/json', authorization: 'Bearer t' },
+    headers: { 'content-type': 'application/json', authorization: 'Bearer <redacted>' },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 }
@@ -81,6 +105,7 @@ beforeEach(() => {
   mockGetUserFromRequest.mockReset();
   mockGetUserFromRequest.mockImplementation(async () => null);
   mockClearAuthCookie.mockClear();
+  mockCancelSquare.mockClear();
 });
 
 describe('deleteAccount', () => {
@@ -103,8 +128,6 @@ describe('deleteAccount', () => {
     expect(ops('post_comments', 'deleteMany')[0].args.where).toEqual({ author_id: 's-1' });
     expect(ops('community_posts', 'deleteMany')[0].args.where).toEqual({ stylist_id: 's-1' });
     expect(ops('transformations', 'deleteMany')[0].args.where).toEqual({ stylist_id: 's-1' });
-    expect(ops('formula_photos', 'deleteMany')[0].args.where).toEqual({ stylist_id: 's-1' });
-    expect(ops('photo_analyses', 'deleteMany')[0].args.where).toEqual({ stylist_id: 's-1' });
     expect(ops('api_keys', 'deleteMany')[0].args.where).toEqual({
       OR: [{ created_by: 's-1' }, { owner_type: 'stylist', owner_id: 's-1' }],
     });
@@ -143,6 +166,36 @@ describe('deleteAccount', () => {
     expect(ops('formulas', 'updateMany')[0].args).toEqual({ where: { stylist_id: 'u-1' }, data: { stylist_id: null } });
   });
 
+  it('retains + detaches formula photos and photo analyses instead of deleting them', async () => {
+    await deleteAccount('u-1', mockPrisma);
+    expect(ops('formula_photos', 'deleteMany')).toEqual([]);
+    expect(ops('photo_analyses', 'deleteMany')).toEqual([]);
+    expect(ops('formula_photos', 'updateMany')[0].args).toEqual({
+      where: { stylist_id: 's-1' }, data: { stylist_id: null },
+    });
+    expect(ops('photo_analyses', 'updateMany')[0].args).toEqual({
+      where: { stylist_id: 's-1' }, data: { stylist_id: null },
+    });
+  });
+
+  it('detaches consultation history with raw SQL and never deletes it', async () => {
+    await deleteAccount('u-1', mockPrisma);
+    const raw = ops('$executeRaw', 'raw');
+    expect(raw).toHaveLength(6);
+    const sql = raw.map((c) => c.args.sql).join('\n');
+    for (const table of ['consent_records', 'consultation_appointments', 'consultation_records',
+      'client_report_tokens', 'client_reports']) {
+      expect(sql).toContain(`"${table}"`);
+    }
+    expect(sql).toContain('"confirmedBy"');
+    for (const c of raw) {
+      expect(c.args.values).toEqual(['u-1', 's-1']);
+      expect(c.args.sql).toContain('= NULL');
+    }
+    // No Prisma-model touch on the consultation tables at all — raw SQL only.
+    expect(calls.filter((c) => /consult|consent/.test(c.model))).toEqual([]);
+  });
+
   it('cancels user- and stylist-level subscriptions only, never salon-level', async () => {
     await deleteAccount('u-1', mockPrisma);
     const w = ops('subscriptions', 'updateMany')[0].args;
@@ -152,6 +205,43 @@ describe('deleteAccount', () => {
     ]);
     expect(JSON.stringify(w.where)).not.toContain('salon');
     expect(w.data).toMatchObject({ status: 'canceled', cancellation_reason: 'account_deleted' });
+  });
+
+  it('cancels live Square subscriptions for user + stylist before any delete, never salon, never grants', async () => {
+    state.subs = [
+      { subscriber_type: 'user', subscriber_id: 'u-1', tier: 'pro', status: 'active', square_subscription_id: 'sq-user', created_at: new Date('2026-01-01') },
+      { subscriber_type: 'stylist', subscriber_id: 's-1', tier: 'pro', status: 'active', square_subscription_id: 'sq-stylist', created_at: new Date('2026-01-01') },
+      { subscriber_type: 'salon', subscriber_id: 'salon-1', tier: 'pro', status: 'active', square_subscription_id: 'sq-salon', created_at: new Date('2026-01-01') },
+      { subscriber_type: 'user', subscriber_id: 'u-1', tier: 'grant:founding', status: 'active', square_subscription_id: null, created_at: new Date('2026-01-01') },
+      { subscriber_type: 'user', subscriber_id: 'u-1', tier: 'pro', status: 'canceled', square_subscription_id: 'sq-old', created_at: new Date('2026-01-01') },
+    ];
+    await deleteAccount('u-1', mockPrisma);
+    expect(mockCancelSquare.mock.calls).toEqual([['sq-user'], ['sq-stylist']]);
+    // Square cancels run before the first database delete.
+    const firstCancel = calls.findIndex((c) => c.model === 'square');
+    const firstDelete = calls.findIndex((c) => c.op === 'deleteMany');
+    expect(firstCancel).toBeGreaterThan(-1);
+    expect(firstCancel).toBeLessThan(firstDelete);
+  });
+
+  it('skips the Square cancel entirely when no live Square subscription exists', async () => {
+    state.subs = [
+      { subscriber_type: 'user', subscriber_id: 'u-1', tier: 'grant:team', status: 'active', square_subscription_id: null, created_at: new Date('2026-01-01') },
+    ];
+    const res = await deleteAccount('u-1', mockPrisma);
+    expect(res).toEqual({ deleted: true, stylistAnonymized: true });
+    expect(mockCancelSquare).not.toHaveBeenCalled();
+  });
+
+  it('aborts the deletion when the Square cancel fails — nothing is deleted', async () => {
+    state.subs = [
+      { subscriber_type: 'user', subscriber_id: 'u-1', tier: 'pro', status: 'active', square_subscription_id: 'sq-user', created_at: new Date('2026-01-01') },
+    ];
+    mockCancelSquare.mockRejectedValueOnce(new Error('square down'));
+    await expect(deleteAccount('u-1', mockPrisma)).rejects.toThrow('square down');
+    expect(ops('users', 'delete')).toEqual([]);
+    expect(calls.filter((c) => ['deleteMany', 'updateMany', 'update', 'delete'].includes(c.op))).toEqual([]);
+    expect(ops('$executeRaw', 'raw')).toEqual([]);
   });
 
   it('never touches salon tables', async () => {
@@ -264,5 +354,21 @@ describe('/api/account route', () => {
     const body = await res.json();
     expect(body.error.code).toBe('DELETION_FAILED');
     expect(JSON.stringify(body)).not.toContain('boom');
+  });
+
+  it('DELETE 500 with a safe message when the Square cancel fails, and deletes nothing', async () => {
+    mockGetUserFromRequest.mockImplementation(async () => ({ userId: 'u-1' }));
+    state.subs = [
+      { subscriber_type: 'user', subscriber_id: 'u-1', tier: 'pro', status: 'active', square_subscription_id: 'sq-user', created_at: new Date('2026-01-01') },
+    ];
+    mockCancelSquare.mockRejectedValueOnce(new Error('square down'));
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const res = await DELETE(req('DELETE', { confirm: 'DELETE' }));
+    spy.mockRestore();
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error.code).toBe('DELETION_FAILED');
+    expect(JSON.stringify(body)).not.toContain('square down');
+    expect(ops('users', 'delete')).toEqual([]);
   });
 });
