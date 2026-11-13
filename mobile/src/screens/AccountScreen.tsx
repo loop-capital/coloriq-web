@@ -144,12 +144,13 @@ export default function AccountScreen({ navigation }: any) {
                   This is permanent and cannot be undone. It will:
                 </Text>
                 <Text style={styles.bullet}>• Delete your login, email and password</Text>
-                <Text style={styles.bullet}>• Delete your profile, posts, comments, likes, photos and photo analyses</Text>
-                <Text style={styles.bullet}>• Revoke your API keys and cancel your personal COLORiq plan</Text>
+                <Text style={styles.bullet}>• Delete your profile, posts, comments and likes</Text>
+                <Text style={styles.bullet}>• Revoke your API keys and cancel your personal COLORiq plan — your Square subscription is canceled too, so billing stops</Text>
                 <Text style={styles.body}>
                   Records that belong to your salon (its clients, inventory, billing, and formulas used in
                   client visits) are kept for the salon and are no longer linked to you.
                 </Text>
+                <Text style={styles.bullet}>• Your formulas, photos and photo analyses stay with COLORiq and are no longer linked to you. You give up any future revenue they earn, which belongs to COLORiq.</Text>
                 <Text style={styles.label}>Type {CONFIRM_WORD} to confirm</Text>
                 <TextInput
                   value={confirmText}
