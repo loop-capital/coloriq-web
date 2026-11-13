@@ -1102,7 +1102,7 @@ model salon_devices {
 model formula_photos {
   id                 String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   formula_id         String                     @db.Uuid
-  stylist_id         String                     @db.Uuid
+  stylist_id         String?                    @db.Uuid
   client_id          String?                    @db.Uuid
   before_url         String?
   after_url          String
@@ -1129,7 +1129,7 @@ model formula_photos {
   photo_votes        formula_photo_votes[]
   clients            clients?                   @relation(fields: [client_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   formulas           formulas                   @relation(fields: [formula_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  stylists           stylists                   @relation(fields: [stylist_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  stylists           stylists?                  @relation(fields: [stylist_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([formula_id], map: "idx_formula_photos_formula")
   @@index([stylist_id], map: "idx_formula_photos_stylist")
