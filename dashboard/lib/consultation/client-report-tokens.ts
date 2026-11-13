@@ -44,7 +44,10 @@ export function tokenExpiryFor(scheduledAt: Date): Date {
 export interface TokenRecord {
   tokenHash: string;
   appointmentId: string;
-  stylistId: string;
+  // Nullable: a deleted stylist's tokens are detached (stylistId NULL) AND
+  // revoked in the same deletion statement, so validation still refuses
+  // them on the revoked branch — the null here never grants anything.
+  stylistId: string | null;
   expiresAt: Date;
   revokedAt: Date | null;
   submissionWindowStart: Date | null;

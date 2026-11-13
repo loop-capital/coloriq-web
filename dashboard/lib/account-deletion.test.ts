@@ -8,9 +8,9 @@
  * is the DB's job and is not simulated beyond "an error inside the
  * transaction rejects the call". The Square client is mocked (no network):
  * cancelSquareSubscriptionIfActive records its calls and can be made to
- * throw. The detach runs through $executeRaw (the columns are nullable in
- * the DB but declared non-nullable in the Prisma schema), which the fake
- * records as SQL + values.
+ * throw. The consultation-history detach runs as typed Prisma updateMany
+ * calls (the stylist columns are nullable in the schema); the fake
+ * records them like any other model call.
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
@@ -59,16 +59,14 @@ const MODELS = [
   'users', 'stylists', 'subscriptions', 'formulas', 'formula_comments', 'formula_photo_comments',
   'trend_searches', 'webhooks', 'post_likes', 'post_comments', 'community_posts', 'transformations',
   'formula_photos', 'photo_analyses', 'api_keys',
+  'consent_records', 'consultation_appointments', 'consultation_records',
+  'client_report_tokens', 'client_reports',
 ];
 
 const mockPrisma: any = Object.fromEntries(MODELS.map((m) => [m, model(m)]));
 mockPrisma.$transaction = async (fn: (tx: any) => Promise<any>) => fn(mockPrisma);
-mockPrisma.$executeRaw = async (strings: any, ...values: any[]) => {
-  const sql = Array.isArray(strings) ? strings.join('?') : String(strings);
-  calls.push({ model: '$executeRaw', op: 'raw', args: { sql, values } });
-  if (state.failOn === '$executeRaw.raw') throw new Error('boom $executeRaw.raw');
-  return 1;
-};
+// No $executeRaw on the fake on purpose: deleteAccount must not use raw
+// SQL — a raw call would throw TypeError here instead of passing silently.
 
 jest.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
 const mockGetUserFromRequest = jest.fn(async (_req: any): Promise<any> => null);
@@ -184,31 +182,40 @@ describe('deleteAccount', () => {
     });
   });
 
-  it('detaches consultation history with raw SQL and never deletes it', async () => {
+  it('detaches consultation history with typed updateMany and never deletes it', async () => {
     await deleteAccount('u-1', mockPrisma);
-    const raw = ops('$executeRaw', 'raw');
-    expect(raw).toHaveLength(8);
-    const sql = raw.map((c) => c.args.sql).join('\n');
-    for (const table of ['consent_records', 'consultation_appointments', 'consultation_records',
+    // No raw SQL anywhere in the deletion.
+    expect(calls.filter((c) => c.model === '$executeRaw')).toEqual([]);
+    const both = { in: ['u-1', 's-1'] };
+    expect(ops('consent_records', 'updateMany')[0].args).toEqual({
+      where: { stylist_id: both }, data: { stylist_id: null },
+    });
+    expect(ops('consultation_appointments', 'updateMany')[0].args).toEqual({
+      where: { stylistId: both }, data: { stylistId: null },
+    });
+    expect(ops('consultation_records', 'updateMany').map((c) => c.args)).toEqual([
+      { where: { stylistId: both }, data: { stylistId: null } },
+      { where: { confirmedBy: both }, data: { confirmedBy: null } },
+    ]);
+    // The deleted stylist's invitations are revoked IN THE SAME statement
+    // as the detach — one atomic update, so the revoke actually lands.
+    // (The old raw-SQL sequence nulled stylistId first and then revoked
+    // WHERE stylistId matched, which matched zero rows.)
+    const tokens = ops('client_report_tokens', 'updateMany');
+    expect(tokens).toHaveLength(1);
+    expect(tokens[0].args.where).toEqual({ stylistId: both });
+    expect(tokens[0].args.data.stylistId).toBeNull();
+    expect(tokens[0].args.data.revokedAt).toBeInstanceOf(Date);
+    expect(ops('client_reports', 'updateMany').map((c) => c.args)).toEqual([
+      { where: { stylistId: both }, data: { stylistId: null } },
+      { where: { confirmedBy: both }, data: { confirmedBy: null } },
+    ]);
+    // Nothing on the five tables is ever deleted.
+    for (const m of ['consent_records', 'consultation_appointments', 'consultation_records',
       'client_report_tokens', 'client_reports']) {
-      expect(sql).toContain(`"${table}"`);
+      expect(ops(m, 'deleteMany')).toEqual([]);
+      expect(ops(m, 'delete')).toEqual([]);
     }
-    // confirmedBy is detached on BOTH tables the confirm route writes it to.
-    expect(sql).toContain('UPDATE "consultation_records" SET "confirmedBy" = NULL');
-    expect(sql).toContain('UPDATE "client_reports" SET "confirmedBy" = NULL');
-    // The deleted stylist's invitations are revoked, not just detached.
-    expect(sql).toContain('UPDATE "client_report_tokens" SET "revokedAt" = ?');
-    for (const c of raw) {
-      if (c.args.sql.includes('"revokedAt"')) {
-        expect(c.args.values).toHaveLength(3); // now + the two person ids
-        expect(c.args.values.slice(1)).toEqual(['u-1', 's-1']);
-      } else {
-        expect(c.args.values).toEqual(['u-1', 's-1']);
-        expect(c.args.sql).toContain('= NULL');
-      }
-    }
-    // No Prisma-model touch on the consultation tables at all — raw SQL only.
-    expect(calls.filter((c) => /consult|consent/.test(c.model))).toEqual([]);
   });
 
   it('cancels user- and stylist-level subscriptions only, never salon-level', async () => {
@@ -289,25 +296,24 @@ describe('deleteAccount', () => {
     await expect(deleteAccount('u-1', mockPrisma)).rejects.toThrow('square down');
     expect(ops('users', 'delete')).toEqual([]);
     expect(calls.filter((c) => ['deleteMany', 'updateMany', 'update', 'delete'].includes(c.op))).toEqual([]);
-    expect(ops('$executeRaw', 'raw')).toEqual([]);
   });
 
-  it('touches no salon records — raw SQL stays inside the five consultation tables', async () => {
+  it('touches no salon records — consultation writes stay inside the five tables', async () => {
     await deleteAccount('u-1', mockPrisma);
     // Prisma-model calls never name a salon/client/inventory table.
     expect(calls.some((c) => /salon|clients|inventory/.test(c.model))).toBe(false);
-    // Raw SQL is confined to the five consultation-history tables. It DOES
+    // Consultation-history writes are confined to the five tables. They DO
     // touch client_reports / client_report_tokens — those are the deleted
     // stylist's own consultation records, detached by design — and never
     // salon, clients, or inventory tables.
-    const raw = ops('$executeRaw', 'raw');
-    const tables = raw.map((c) => c.args.sql.match(/UPDATE "([^"]+)"/)?.[1]);
-    expect(tables).toHaveLength(8);
-    for (const t of tables) {
-      expect(['consent_records', 'consultation_appointments', 'consultation_records',
-        'client_report_tokens', 'client_reports']).toContain(t);
+    const FIVE = ['consent_records', 'consultation_appointments', 'consultation_records',
+      'client_report_tokens', 'client_reports'];
+    const consult = calls.filter((c) => FIVE.includes(c.model));
+    expect(consult.length).toBeGreaterThan(0);
+    for (const c of consult) {
+      expect(c.op).toBe('updateMany');
     }
-    expect(new Set(tables).size).toBe(5);
+    expect(new Set(consult.map((c) => c.model)).size).toBe(5);
   });
 
   it('handles a user with no stylist profile', async () => {

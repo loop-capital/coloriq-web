@@ -50,7 +50,7 @@ const submitSchema = z.object({
 function toTokenRecord(row: {
   tokenHash: string;
   appointmentId: string;
-  stylistId: string;
+  stylistId: string | null;
   expiresAt: Date;
   revokedAt: Date | null;
   submissionWindowStart: Date | null;

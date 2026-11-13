@@ -40,10 +40,10 @@
  *     NEVER deleted — the stylist reference is set to null, and the
  *     stylist's invitation tokens are revoked (revokedAt = now) so dead
  *     invitations die deliberately instead of lingering until expiry.
- *     The stylist columns are nullable in the database but declared
- *     non-nullable in the Prisma schema, so the detach runs as raw SQL
- *     inside the transaction. Their stylist columns store the stylist's
- *     USERS id.
+ *     The detach runs as typed Prisma updateMany calls inside the
+ *     transaction — the stylist columns are nullable in both the
+ *     database and the schema (migration 20261112_account_deletion_detach).
+ *     Their stylist columns store the stylist's USERS id.
  *
  * PAYOUT NOTE: the marketplace 70/30 ledger keys off
  * formula_listings.creator_id, NOT off formulas/formula_photos
@@ -229,20 +229,45 @@ export async function deleteAccount(userId: string, db: Db = defaultPrisma): Pro
 
     // Consultation history (Nov 10 tables): detach the stylist reference,
     // NEVER delete the rows — clients' consultation history must survive.
-    // The columns are nullable in the DB but declared non-nullable in the
-    // Prisma schema, so this runs as raw SQL inside the transaction.
-    await tx.$executeRaw`UPDATE "consent_records" SET "stylist_id" = NULL WHERE "stylist_id" IN (${userId}, ${stylistRef})`;
-    await tx.$executeRaw`UPDATE "consultation_appointments" SET "stylistId" = NULL WHERE "stylistId" IN (${userId}, ${stylistRef})`;
-    await tx.$executeRaw`UPDATE "consultation_records" SET "stylistId" = NULL WHERE "stylistId" IN (${userId}, ${stylistRef})`;
-    await tx.$executeRaw`UPDATE "consultation_records" SET "confirmedBy" = NULL WHERE "confirmedBy" IN (${userId}, ${stylistRef})`;
-    await tx.$executeRaw`UPDATE "client_report_tokens" SET "stylistId" = NULL WHERE "stylistId" IN (${userId}, ${stylistRef})`;
-    // Revoke the deleted stylist's invitations: a dead stylist's links die
-    // deliberately here instead of 500ing the form door until expiry.
-    await tx.$executeRaw`UPDATE "client_report_tokens" SET "revokedAt" = ${now} WHERE "stylistId" IN (${userId}, ${stylistRef})`;
-    await tx.$executeRaw`UPDATE "client_reports" SET "stylistId" = NULL WHERE "stylistId" IN (${userId}, ${stylistRef})`;
+    // The stylist columns are nullable in the schema (migration
+    // 20261112_account_deletion_detach), so this runs as typed Prisma
+    // updateMany calls inside the transaction — same statements, same
+    // transaction, no raw SQL. The token revoke rides in the SAME
+    // updateMany as the token detach: the old raw-SQL sequence nulled
+    // stylistId first and then revoked WHERE stylistId matched, which
+    // matched zero rows — the revoke never happened.
+    await tx.consent_records.updateMany({
+      where: { stylist_id: { in: [userId, stylistRef] } },
+      data: { stylist_id: null },
+    });
+    await tx.consultation_appointments.updateMany({
+      where: { stylistId: { in: [userId, stylistRef] } },
+      data: { stylistId: null },
+    });
+    await tx.consultation_records.updateMany({
+      where: { stylistId: { in: [userId, stylistRef] } },
+      data: { stylistId: null },
+    });
     // CONCERN 4: the confirm route writes confirmedBy into BOTH
     // consultation_records and client_reports — detach both.
-    await tx.$executeRaw`UPDATE "client_reports" SET "confirmedBy" = NULL WHERE "confirmedBy" IN (${userId}, ${stylistRef})`;
+    await tx.consultation_records.updateMany({
+      where: { confirmedBy: { in: [userId, stylistRef] } },
+      data: { confirmedBy: null },
+    });
+    // Revoke the deleted stylist's invitations in the same statement as
+    // the detach, so the revoke actually lands on the detached rows.
+    await tx.client_report_tokens.updateMany({
+      where: { stylistId: { in: [userId, stylistRef] } },
+      data: { stylistId: null, revokedAt: now },
+    });
+    await tx.client_reports.updateMany({
+      where: { stylistId: { in: [userId, stylistRef] } },
+      data: { stylistId: null },
+    });
+    await tx.client_reports.updateMany({
+      where: { confirmedBy: { in: [userId, stylistRef] } },
+      data: { confirmedBy: null },
+    });
 
     await tx.formulas.updateMany({ where: { stylist_id: userId }, data: { stylist_id: null } });
     await tx.users.delete({ where: { id: userId } });

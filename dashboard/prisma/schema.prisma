@@ -1769,7 +1769,7 @@ model triage_sessions {
 model consultation_appointments {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   salonId     String   @db.Uuid
-  stylistId   String   @db.Uuid
+  stylistId   String?  @db.Uuid
   clientId    String   @db.Uuid
   scheduledAt DateTime @db.Timestamp(6)
   brand       String?  @db.VarChar(100)
@@ -1787,7 +1787,7 @@ model consultation_appointments {
 model client_report_tokens {
   id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   appointmentId         String    @db.Uuid
-  stylistId             String    @db.Uuid
+  stylistId             String?   @db.Uuid
   tokenHash             String    @unique @db.VarChar(64)
   expiresAt             DateTime  @db.Timestamp(6)
   revokedAt             DateTime? @db.Timestamp(6)
@@ -1802,7 +1802,7 @@ model client_reports {
   id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   appointmentId    String    @db.Uuid
   tokenId          String?   @db.Uuid
-  stylistId        String    @db.Uuid
+  stylistId        String?   @db.Uuid
   clientId         String    @db.Uuid
   channel          String    @db.VarChar(20)
   status           String    @default("pending") @db.VarChar(20)
@@ -1822,7 +1822,7 @@ model client_reports {
 model consultation_records {
   id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   appointmentId     String    @unique @db.Uuid
-  stylistId         String    @db.Uuid
+  stylistId         String?   @db.Uuid
   clientId          String    @db.Uuid
   fields            Json
   confirmedReportId String?   @db.Uuid
