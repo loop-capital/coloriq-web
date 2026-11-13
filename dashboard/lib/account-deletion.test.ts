@@ -8,8 +8,9 @@
  * is the DB's job and is not simulated beyond "an error inside the
  * transaction rejects the call". The Square client is mocked (no network):
  * cancelSquareSubscriptionIfActive records its calls and can be made to
- * throw. The Nov 10 consultation tables are not Prisma models, so their
- * detach runs through $executeRaw, which the fake records as SQL + values.
+ * throw. The detach runs through $executeRaw (the columns are nullable in
+ * the DB but declared non-nullable in the Prisma schema), which the fake
+ * records as SQL + values.
  */
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
@@ -79,8 +80,11 @@ jest.mock('@/lib/auth', () => ({
 const mockCancelSquare = jest.fn(async (id: string) => {
   calls.push({ model: 'square', op: 'cancel', args: { subscriptionId: id } });
 });
+const mockGetSquareSubscription = jest.fn(async (_id: string) => ({ status: 'ACTIVE' }));
 jest.mock('@/lib/square', () => ({
   cancelSquareSubscriptionIfActive: (...a: any[]) => (mockCancelSquare as any)(...a),
+  getSquareSubscription: (...a: any[]) => (mockGetSquareSubscription as any)(...a),
+  isSquareNotFound: (err: any) => err?.statusCode === 404,
 }));
 
 import { deleteAccount, getAccountPlanState, planLabel, DELETED_EMAIL_DOMAIN } from './account-deletion';
@@ -106,6 +110,8 @@ beforeEach(() => {
   mockGetUserFromRequest.mockImplementation(async () => null);
   mockClearAuthCookie.mockClear();
   mockCancelSquare.mockClear();
+  mockGetSquareSubscription.mockReset();
+  mockGetSquareSubscription.mockImplementation(async () => ({ status: 'ACTIVE' }));
 });
 
 describe('deleteAccount', () => {
@@ -181,16 +187,25 @@ describe('deleteAccount', () => {
   it('detaches consultation history with raw SQL and never deletes it', async () => {
     await deleteAccount('u-1', mockPrisma);
     const raw = ops('$executeRaw', 'raw');
-    expect(raw).toHaveLength(6);
+    expect(raw).toHaveLength(8);
     const sql = raw.map((c) => c.args.sql).join('\n');
     for (const table of ['consent_records', 'consultation_appointments', 'consultation_records',
       'client_report_tokens', 'client_reports']) {
       expect(sql).toContain(`"${table}"`);
     }
-    expect(sql).toContain('"confirmedBy"');
+    // confirmedBy is detached on BOTH tables the confirm route writes it to.
+    expect(sql).toContain('UPDATE "consultation_records" SET "confirmedBy" = NULL');
+    expect(sql).toContain('UPDATE "client_reports" SET "confirmedBy" = NULL');
+    // The deleted stylist's invitations are revoked, not just detached.
+    expect(sql).toContain('UPDATE "client_report_tokens" SET "revokedAt" = ?');
     for (const c of raw) {
-      expect(c.args.values).toEqual(['u-1', 's-1']);
-      expect(c.args.sql).toContain('= NULL');
+      if (c.args.sql.includes('"revokedAt"')) {
+        expect(c.args.values).toHaveLength(3); // now + the two person ids
+        expect(c.args.values.slice(1)).toEqual(['u-1', 's-1']);
+      } else {
+        expect(c.args.values).toEqual(['u-1', 's-1']);
+        expect(c.args.sql).toContain('= NULL');
+      }
     }
     // No Prisma-model touch on the consultation tables at all — raw SQL only.
     expect(calls.filter((c) => /consult|consent/.test(c.model))).toEqual([]);
@@ -224,6 +239,39 @@ describe('deleteAccount', () => {
     expect(firstCancel).toBeLessThan(firstDelete);
   });
 
+  it('skips Square subscriptions already terminal at Square (pre-validation)', async () => {
+    state.subs = [
+      { subscriber_type: 'user', subscriber_id: 'u-1', tier: 'pro', status: 'active', square_subscription_id: 'sq-live', created_at: new Date('2026-01-01') },
+      { subscriber_type: 'user', subscriber_id: 'u-1', tier: 'pro', status: 'active', square_subscription_id: 'sq-dead', created_at: new Date('2026-01-01') },
+    ];
+    mockGetSquareSubscription.mockImplementation(async (id: string) => ({
+      status: id === 'sq-dead' ? 'CANCELED' : 'ACTIVE',
+    }));
+    const res = await deleteAccount('u-1', mockPrisma);
+    expect(res).toEqual({ deleted: true, stylistAnonymized: true });
+    expect(mockCancelSquare.mock.calls).toEqual([['sq-live']]);
+  });
+
+  it('skips a Square subscription the status fetch proves gone (404)', async () => {
+    state.subs = [
+      { subscriber_type: 'user', subscriber_id: 'u-1', tier: 'pro', status: 'active', square_subscription_id: 'sq-gone', created_at: new Date('2026-01-01') },
+    ];
+    mockGetSquareSubscription.mockRejectedValueOnce({ statusCode: 404 });
+    const res = await deleteAccount('u-1', mockPrisma);
+    expect(res).toEqual({ deleted: true, stylistAnonymized: true });
+    expect(mockCancelSquare).not.toHaveBeenCalled();
+  });
+
+  it('attempts the cancel when the status fetch fails for a non-404 reason', async () => {
+    state.subs = [
+      { subscriber_type: 'user', subscriber_id: 'u-1', tier: 'pro', status: 'active', square_subscription_id: 'sq-user', created_at: new Date('2026-01-01') },
+    ];
+    mockGetSquareSubscription.mockRejectedValueOnce({ statusCode: 500 });
+    const res = await deleteAccount('u-1', mockPrisma);
+    expect(res).toEqual({ deleted: true, stylistAnonymized: true });
+    expect(mockCancelSquare.mock.calls).toEqual([['sq-user']]);
+  });
+
   it('skips the Square cancel entirely when no live Square subscription exists', async () => {
     state.subs = [
       { subscriber_type: 'user', subscriber_id: 'u-1', tier: 'grant:team', status: 'active', square_subscription_id: null, created_at: new Date('2026-01-01') },
@@ -244,9 +292,22 @@ describe('deleteAccount', () => {
     expect(ops('$executeRaw', 'raw')).toEqual([]);
   });
 
-  it('never touches salon tables', async () => {
+  it('touches no salon records — raw SQL stays inside the five consultation tables', async () => {
     await deleteAccount('u-1', mockPrisma);
+    // Prisma-model calls never name a salon/client/inventory table.
     expect(calls.some((c) => /salon|clients|inventory/.test(c.model))).toBe(false);
+    // Raw SQL is confined to the five consultation-history tables. It DOES
+    // touch client_reports / client_report_tokens — those are the deleted
+    // stylist's own consultation records, detached by design — and never
+    // salon, clients, or inventory tables.
+    const raw = ops('$executeRaw', 'raw');
+    const tables = raw.map((c) => c.args.sql.match(/UPDATE "([^"]+)"/)?.[1]);
+    expect(tables).toHaveLength(8);
+    for (const t of tables) {
+      expect(['consent_records', 'consultation_appointments', 'consultation_records',
+        'client_report_tokens', 'client_reports']).toContain(t);
+    }
+    expect(new Set(tables).size).toBe(5);
   });
 
   it('handles a user with no stylist profile', async () => {

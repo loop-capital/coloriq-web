@@ -1,6 +1,6 @@
 // =====================================================
 // SQUARE PAYMENT INTEGRATION
-// Cost-plus pricing with Square (SDK v42+)
+// Cost-plus pricing with Square (SDK v44)
 // =====================================================
 
 import { SquareClient, SquareEnvironment } from 'square';
@@ -88,12 +88,41 @@ export async function getSquareSubscription(subscriptionId: string) {
 // a CANCELED / DEACTIVATED / COMPLETED subscription, or one Square no
 // longer knows, is not billing anyone and counts as done. Any other
 // failure rethrows: the caller must abort rather than leave billing live.
+//
+// The re-fetch is the dangerous step: a network outage, DNS failure,
+// Square 5xx, 429, or a 401 from a bad SQUARE_ACCESS_TOKEN must NEVER be
+// read as "the subscription is dead". Only a PROVEN 404/not-found on the
+// re-fetch counts as done — everything else rethrows the original error.
+/**
+ * True only for a proven Square not-found: HTTP 404, or a Square error
+ * body carrying code NOT_FOUND. Duck-typed (no instanceof) so it works
+ * with the real SDK error and with plain-object errors in tests.
+ */
+export function isSquareNotFound(err: unknown): boolean {
+  if (typeof err !== 'object' || err === null) return false;
+  const e = err as { statusCode?: unknown; errors?: unknown };
+  if (e.statusCode === 404) return true;
+  if (Array.isArray(e.errors)) {
+    return e.errors.some(
+      (x) => typeof x === 'object' && x !== null && (x as { code?: unknown }).code === 'NOT_FOUND',
+    );
+  }
+  return false;
+}
+
 export async function cancelSquareSubscriptionIfActive(subscriptionId: string): Promise<void> {
   try {
     await cancelSquareSubscription(subscriptionId);
+    return;
   } catch (err) {
-    const sub = await getSquareSubscription(subscriptionId).catch(() => null);
-    if (!sub) return;
+    let sub: Awaited<ReturnType<typeof getSquareSubscription>>;
+    try {
+      sub = await getSquareSubscription(subscriptionId);
+    } catch (refetchErr) {
+      if (isSquareNotFound(refetchErr)) return;
+      throw err;
+    }
+    if (!sub) throw err;
     if (sub.status === 'CANCELED' || sub.status === 'DEACTIVATED' || sub.status === 'COMPLETED') return;
     throw err;
   }

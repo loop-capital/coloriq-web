@@ -37,10 +37,13 @@
  *     to COLORiq (Jason's ruling, 2026-11-12).
  *   - consultation history (consent_records, consultation_records,
  *     consultation_appointments, client_report_tokens, client_reports):
- *     NEVER deleted — the stylist reference is set to null. These tables
- *     are not in the Prisma schema (raw SQL, Nov 10), so the detach runs
- *     as raw SQL inside the transaction. Their stylist columns store the
- *     stylist's USERS id.
+ *     NEVER deleted — the stylist reference is set to null, and the
+ *     stylist's invitation tokens are revoked (revokedAt = now) so dead
+ *     invitations die deliberately instead of lingering until expiry.
+ *     The stylist columns are nullable in the database but declared
+ *     non-nullable in the Prisma schema, so the detach runs as raw SQL
+ *     inside the transaction. Their stylist columns store the stylist's
+ *     USERS id.
  *
  * PAYOUT NOTE: the marketplace 70/30 ledger keys off
  * formula_listings.creator_id, NOT off formulas/formula_photos
@@ -65,7 +68,7 @@
  */
 
 import { prisma as defaultPrisma } from '@/lib/prisma';
-import { cancelSquareSubscriptionIfActive } from '@/lib/square';
+import { cancelSquareSubscriptionIfActive, getSquareSubscription, isSquareNotFound } from '@/lib/square';
 
 type Db = typeof defaultPrisma;
 
@@ -82,6 +85,22 @@ export interface DeletionResult {
  * subscriptions are never touched. Rows with no square_subscription_id
  * (grants, already-canceled) are skipped. Throws on any live cancel
  * failure — the caller must abort the deletion.
+ *
+ * Each subscription is pre-validated (status fetched first) and canceled
+ * only while it is live at Square — ACTIVE / PENDING / PAUSED, all three
+ * of which can bill, on start or on resume. Subscriptions already
+ * terminal (CANCELED / DEACTIVATED / COMPLETED) are skipped. If the
+ * status fetch itself fails with a proven 404 the subscription is gone
+ * and is skipped; any other fetch failure falls through to attempting
+ * the cancel, and the tolerance in cancelSquareSubscriptionIfActive
+ * decides (a proven 404 counts as done, anything else aborts).
+ *
+ * PARTIAL CANCEL: the cancels run sequentially against Square, so if the
+ * second cancel throws, the first is already canceled at Square while the
+ * account survives. Every canceled (and skipped) id is logged so support
+ * can reconcile, and a retry CONVERGES: the already-canceled subscription
+ * now reads as terminal and is skipped, the remaining ones are canceled,
+ * and the deletion proceeds.
  */
 async function cancelLiveSquareSubscriptions(
   userId: string,
@@ -100,9 +119,25 @@ async function cancelLiveSquareSubscriptions(
     select: { square_subscription_id: true },
   });
   for (const row of rows) {
-    if (row.square_subscription_id) {
-      await cancelSquareSubscriptionIfActive(row.square_subscription_id);
+    const id = row.square_subscription_id;
+    if (!id) continue;
+    // Pre-validate: skip subscriptions already dead at Square.
+    let status: string | undefined;
+    try {
+      status = (await getSquareSubscription(id))?.status;
+    } catch (err) {
+      if (isSquareNotFound(err)) {
+        console.log(`[account-deletion] Square subscription ${id} already gone at Square; skipping cancel for user ${userId}`);
+        continue;
+      }
+      // Status unknown — attempt the cancel and let the tolerance logic decide.
     }
+    if (status === 'CANCELED' || status === 'DEACTIVATED' || status === 'COMPLETED') {
+      console.log(`[account-deletion] Square subscription ${id} already ${status}; skipping cancel for user ${userId}`);
+      continue;
+    }
+    await cancelSquareSubscriptionIfActive(id);
+    console.log(`[account-deletion] canceled Square subscription ${id} for user ${userId}`);
   }
 }
 
@@ -192,15 +227,22 @@ export async function deleteAccount(userId: string, db: Db = defaultPrisma): Pro
       });
     }
 
-    // Consultation history (Nov 10 tables, not in the Prisma schema):
-    // detach the stylist reference, NEVER delete the rows — clients'
-    // consultation history must survive. Raw SQL inside the transaction.
+    // Consultation history (Nov 10 tables): detach the stylist reference,
+    // NEVER delete the rows — clients' consultation history must survive.
+    // The columns are nullable in the DB but declared non-nullable in the
+    // Prisma schema, so this runs as raw SQL inside the transaction.
     await tx.$executeRaw`UPDATE "consent_records" SET "stylist_id" = NULL WHERE "stylist_id" IN (${userId}, ${stylistRef})`;
     await tx.$executeRaw`UPDATE "consultation_appointments" SET "stylistId" = NULL WHERE "stylistId" IN (${userId}, ${stylistRef})`;
     await tx.$executeRaw`UPDATE "consultation_records" SET "stylistId" = NULL WHERE "stylistId" IN (${userId}, ${stylistRef})`;
     await tx.$executeRaw`UPDATE "consultation_records" SET "confirmedBy" = NULL WHERE "confirmedBy" IN (${userId}, ${stylistRef})`;
     await tx.$executeRaw`UPDATE "client_report_tokens" SET "stylistId" = NULL WHERE "stylistId" IN (${userId}, ${stylistRef})`;
+    // Revoke the deleted stylist's invitations: a dead stylist's links die
+    // deliberately here instead of 500ing the form door until expiry.
+    await tx.$executeRaw`UPDATE "client_report_tokens" SET "revokedAt" = ${now} WHERE "stylistId" IN (${userId}, ${stylistRef})`;
     await tx.$executeRaw`UPDATE "client_reports" SET "stylistId" = NULL WHERE "stylistId" IN (${userId}, ${stylistRef})`;
+    // CONCERN 4: the confirm route writes confirmedBy into BOTH
+    // consultation_records and client_reports — detach both.
+    await tx.$executeRaw`UPDATE "client_reports" SET "confirmedBy" = NULL WHERE "confirmedBy" IN (${userId}, ${stylistRef})`;
 
     await tx.formulas.updateMany({ where: { stylist_id: userId }, data: { stylist_id: null } });
     await tx.users.delete({ where: { id: userId } });

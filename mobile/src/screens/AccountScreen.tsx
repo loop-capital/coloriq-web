@@ -79,6 +79,12 @@ export default function AccountScreen({ navigation }: any) {
   };
 
   const plan = info?.plan;
+  // The Square-cancel promise below is only true for a personal, paid
+  // plan: a salon-plan subscriber's billing is untouched by deletion, and
+  // a grant holder has no Square subscription to cancel. Default to the
+  // softened line whenever the plan state doesn't prove personal billing.
+  const hasPersonalPaidPlan =
+    !!plan && plan.hasAccess && (plan.scope === 'user' || plan.scope === 'stylist') && !plan.tier?.startsWith('grant:');
   const planLine = plan?.label
     ? `${plan.label}${plan.hasAccess ? '' : plan.status ? ` · ${plan.status}` : ''}`
     : 'No active plan';
@@ -145,12 +151,12 @@ export default function AccountScreen({ navigation }: any) {
                 </Text>
                 <Text style={styles.bullet}>• Delete your login, email and password</Text>
                 <Text style={styles.bullet}>• Delete your profile, posts, comments and likes</Text>
-                <Text style={styles.bullet}>• Revoke your API keys and cancel your personal COLORiq plan — your Square subscription is canceled too, so billing stops</Text>
+                <Text style={styles.bullet}>• Revoke your API keys and cancel your personal COLORiq plan{hasPersonalPaidPlan ? ' — your Square subscription is canceled too, so billing stops' : ''}</Text>
                 <Text style={styles.body}>
                   Records that belong to your salon (its clients, inventory, billing, and formulas used in
                   client visits) are kept for the salon and are no longer linked to you.
                 </Text>
-                <Text style={styles.bullet}>• Your formulas, photos and photo analyses stay with COLORiq and are no longer linked to you. You give up any future revenue they earn, which belongs to COLORiq.</Text>
+                <Text style={styles.bullet}>• Your formulas, photos and photo analyses stay with COLORiq and are no longer linked to you. You give up any claim to future revenue from them.</Text>
                 <Text style={styles.label}>Type {CONFIRM_WORD} to confirm</Text>
                 <TextInput
                   value={confirmText}

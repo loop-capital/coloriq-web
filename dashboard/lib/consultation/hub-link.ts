@@ -30,6 +30,10 @@ export async function validateHubToken(rawToken: string): Promise<HubLinkResult>
     where: { id: row.appointmentId },
   });
   if (!appt || appt.status !== 'scheduled') return { ok: false };
+  // A deleted stylist's still-scheduled appointment has stylistId NULL
+  // after the account-deletion detach. Prisma throws on findUnique with a
+  // null id, which would 500 the door — treat the link as invalid instead.
+  if (!appt.stylistId) return { ok: false };
   const client = await prisma.clients.findUnique({
     where: { id: appt.clientId },
     select: { first_name: true },
